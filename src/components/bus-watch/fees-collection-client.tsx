@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -49,11 +49,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import type { Student, BusFeePayment } from '@/lib/types';
+import type { Student } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
 const searchSchema = z.object({
-  admissionNo: z.string().min(1, 'Admission number is required.'),
+  studentId: z.string().min(1, 'Student selection is required.'),
   academicYear: z.string(),
 });
 
@@ -74,7 +74,7 @@ type FeeDetails = {
 
 type FeesCollectionClientProps = {
   students: Student[];
-  payments: BusFeePayment[];
+  payments: any[]; // Using any for payments for now
   feeCategories: FeeCategory[];
 };
 
@@ -92,7 +92,7 @@ export default function FeesCollectionClient({
   const searchForm = useForm<z.infer<typeof searchSchema>>({
     resolver: zodResolver(searchSchema),
     defaultValues: {
-      admissionNo: '',
+      studentId: '',
       academicYear: `${new Date().getFullYear()}/${(
         new Date().getFullYear() + 1
       )
@@ -107,8 +107,7 @@ export default function FeesCollectionClient({
 
   const handleSearch = (values: z.infer<typeof searchSchema>) => {
     setIsSearching(true);
-    // In a real app, you might use the admission number to query the backend
-    const student = students.find((s) => s.id === values.admissionNo); // Assuming id is admission no for now
+    const student = students.find((s) => s.id === values.studentId);
 
     setTimeout(() => {
       if (student) {
@@ -123,7 +122,6 @@ export default function FeesCollectionClient({
               0
             );
           }
-          // Placeholder logic for other categories
           if (cat.id === 'tuition') paidAmount = 10000;
 
           const balance = cat.totalAmount - paidAmount;
@@ -132,7 +130,7 @@ export default function FeesCollectionClient({
             name: cat.name,
             totalAmount: cat.totalAmount,
             paidAmount,
-            dueAmount: balance > 0 ? balance : 0, // Simplified due logic
+            dueAmount: balance > 0 ? balance : 0,
             balance: balance,
           };
         });
@@ -144,7 +142,7 @@ export default function FeesCollectionClient({
         toast({
           variant: 'destructive',
           title: 'Not Found',
-          description: 'No student found with that admission number.',
+          description: 'No student found with that name.',
         });
       }
       setIsSearching(false);
@@ -152,7 +150,7 @@ export default function FeesCollectionClient({
   };
 
   const handleReset = () => {
-    searchForm.reset();
+    searchForm.reset({studentId: '', academicYear: searchForm.getValues('academicYear')});
     setSelectedStudent(null);
     setStudentFeeDetails([]);
     setSelectedFeeIds([]);
@@ -174,7 +172,6 @@ export default function FeesCollectionClient({
       });
       return;
     }
-    // In a real app, this would call a server action
     console.log({
       studentId: selectedStudent?.id,
       amountPaid: totalPayable,
@@ -227,13 +224,24 @@ export default function FeesCollectionClient({
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
             <FormField
               control={searchForm.control}
-              name="admissionNo"
+              name="studentId"
               render={({ field }) => (
                 <FormItem className="md:col-span-2">
-                  <FormLabel>Admission No / Student Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter admission no. or name..." {...field} />
-                  </FormControl>
+                  <FormLabel>Student Name</FormLabel>
+                   <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a student..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {students.map((student) => (
+                        <SelectItem key={student.id} value={student.id}>
+                          {student.name} ({student.fatherName})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -293,10 +301,6 @@ export default function FeesCollectionClient({
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Admission No</p>
-                  <p className="font-medium">{selectedStudent.id}</p>
-                </div>
                 <div>
                   <p className="text-muted-foreground">Student Name</p>
                   <p className="font-medium">{selectedStudent.name}</p>
