@@ -51,6 +51,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import type { Student } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { Label } from '../ui/label';
 
 const searchSchema = z.object({
   studentId: z.string().min(1, 'Student selection is required.'),
