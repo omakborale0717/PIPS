@@ -58,10 +58,12 @@ const searchSchema = z.object({
   academicYear: z.string(),
 });
 
-type FeeCategory = {
+export type FeeCategory = {
   id: string;
   name: string;
   totalAmount: number;
+  class?: string;
+  village?: string;
 };
 
 type FeeDetails = {
@@ -71,6 +73,8 @@ type FeeDetails = {
   dueAmount: number;
   paidAmount: number;
   balance: number;
+  class?: string;
+  village?: string;
 };
 
 type FeesCollectionClientProps = {
@@ -133,6 +137,8 @@ export default function FeesCollectionClient({
             paidAmount,
             dueAmount: balance > 0 ? balance : 0,
             balance: balance,
+            class: cat.class || student.class,
+            village: cat.village || student.village,
           };
         });
         setStudentFeeDetails(details);
@@ -202,7 +208,7 @@ export default function FeesCollectionClient({
 
   const getCategoryIcon = (categoryName: string) => {
     switch (categoryName.toLowerCase()) {
-      case 'tuition fees': return <Info className="h-4 w-4 text-blue-500" />;
+      case 'school fees': return <Info className="h-4 w-4 text-blue-500" />;
       case 'bus fees': return <Bus className="h-4 w-4 text-green-500" />;
       case 'fine': return <BadgePercent className="h-4 w-4 text-red-500" />;
       case 'remark': return <StickyNote className="h-4 w-4 text-yellow-500" />;
@@ -343,6 +349,8 @@ export default function FeesCollectionClient({
                     />
                     </TableHead>
                     <TableHead>Fees Category</TableHead>
+                    <TableHead>Class</TableHead>
+                    <TableHead>Village</TableHead>
                     <TableHead className="text-right">Total Amount</TableHead>
                     <TableHead className="text-right">Due Amount</TableHead>
                     <TableHead className="text-right">Paid Amount</TableHead>
@@ -369,6 +377,8 @@ export default function FeesCollectionClient({
                         {getCategoryIcon(fee.name)}
                         {fee.name}
                     </TableCell>
+                     <TableCell>{fee.class}</TableCell>
+                     <TableCell>{fee.village}</TableCell>
                     <TableCell className="text-right">
                         {fee.totalAmount.toLocaleString()}
                     </TableCell>
@@ -397,7 +407,7 @@ export default function FeesCollectionClient({
                     <span className="text-lg font-bold text-primary">₹{totalPayable.toLocaleString()}</span>
                 </div>
                  <div className="flex flex-col">
-                    <span className="text-sm text-muted-foreground">Balance After Payment</span>
+                    <span className="text-muted-foreground">Balance After Payment</span>
                     <span className="text-lg font-bold">₹{(studentFeeDetails.reduce((acc, fee) => acc + fee.balance, 0) - totalPayable).toLocaleString()}</span>
                 </div>
               </AlertDescription>
