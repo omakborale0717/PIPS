@@ -93,6 +93,7 @@ export default function FeesCollectionClient({
   const [studentFeeDetails, setStudentFeeDetails] = useState<FeeDetails[]>([]);
   const [selectedFeeIds, setSelectedFeeIds] = useState<string[]>([]);
   const [narration, setNarration] = useState('');
+  const [selectedClass, setSelectedClass] = useState('all');
 
   const searchForm = useForm<z.infer<typeof searchSchema>>({
     resolver: zodResolver(searchSchema),
@@ -162,6 +163,7 @@ export default function FeesCollectionClient({
     setStudentFeeDetails([]);
     setSelectedFeeIds([]);
     setNarration('');
+    setSelectedClass('all');
   };
 
   const totalPayable = useMemo(() => {
@@ -220,6 +222,14 @@ export default function FeesCollectionClient({
     const startYear = new Date().getFullYear() - 2 + i;
     return `${startYear}/${(startYear + 1).toString().slice(2)}`;
   });
+  
+  const uniqueClasses = ['all', ...Array.from(new Set(students.map(s => s.class)))];
+  
+  const filteredStudents = useMemo(() => {
+      if(selectedClass === 'all') return students;
+      return students.filter(s => s.class === selectedClass);
+  }, [students, selectedClass]);
+
 
   return (
     <div className="space-y-6">
@@ -229,6 +239,30 @@ export default function FeesCollectionClient({
           className="p-4 border rounded-lg bg-muted/30"
         >
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+             <FormItem>
+              <FormLabel>Class</FormLabel>
+              <Select
+                value={selectedClass}
+                onValueChange={(value) => {
+                  setSelectedClass(value);
+                  searchForm.reset({ ...searchForm.getValues(), studentId: '' });
+                  setSelectedStudent(null);
+                  setStudentFeeDetails([]);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Class" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Classes</SelectItem>
+                  {uniqueClasses.filter(c => c !== 'all').map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormItem>
             <FormField
               control={searchForm.control}
               name="studentId"
@@ -242,7 +276,7 @@ export default function FeesCollectionClient({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {students.map((student) => (
+                      {filteredStudents.map((student) => (
                         <SelectItem key={student.id} value={student.id}>
                           {student.name} ({student.fatherName})
                         </SelectItem>
@@ -279,14 +313,14 @@ export default function FeesCollectionClient({
                 </FormItem>
               )}
             />
-            <div className="md:col-span-2 flex gap-2">
+            <div className="md:col-span-1 flex gap-2">
               <Button type="submit" disabled={isSearching} className="w-full">
                 {isSearching ? (
                   <Loader2 className="animate-spin" />
                 ) : (
                   <Search />
                 )}
-                <span className="ml-2">Search Fees</span>
+                <span className="ml-2">Search</span>
               </Button>
                <Button type="button" variant="outline" onClick={handleReset}>
                 <RotateCcw />
@@ -440,3 +474,5 @@ export default function FeesCollectionClient({
     </div>
   );
 }
+
+    
