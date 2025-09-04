@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { getGeneralSettingsAction, getBusFeesSettingsAction, getProfileSettingsAction, getVillageFeesAction } from '@/app/actions';
-import { KeyRound, Building, Bus, Palette, Bell, BadgePercent, IndianRupee, Phone, MapPin } from 'lucide-react';
+import { KeyRound, Building, Bus, Palette, Bell, BadgePercent, IndianRupee, Phone, MapPin, BookUser } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -27,6 +27,17 @@ export default async function SettingsPage() {
   const busFeesSettings = await getBusFeesSettingsAction();
   const profileSettings = await getProfileSettingsAction();
   const villageFees = await getVillageFeesAction();
+
+  const schoolFees = [
+    { class: 'Nursery', term1: 10000, term2: 10000, total: 20000 },
+    { class: 'LKG', term1: 12000, term2: 12000, total: 24000 },
+    { class: 'UKG', term1: 12000, term2: 12000, total: 24000 },
+    { class: '1st', term1: 15000, term2: 15000, total: 30000 },
+    { class: '2nd', term1: 15000, term2: 15000, total: 30000 },
+    { class: '3rd', term1: 15000, term2: 15000, total: 30000 },
+    { class: '4th', term1: 15000, term2: 15000, total: 30000 },
+    { class: '5th', term1: 15000, term2: 15000, total: 30000 },
+  ];
 
   return (
     <main className="flex-1 p-4 md:p-6 lg:p-8">
@@ -61,6 +72,40 @@ export default async function SettingsPage() {
                 <p className="text-sm text-muted-foreground">Profile settings not found.</p>
                )}
             </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookUser className="h-5 w-5 text-primary" />
+              School Fees Structure
+            </CardTitle>
+            <CardDescription>
+              Fee structure based on class for the academic year.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+             <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Class</TableHead>
+                        <TableHead className="text-right">Term 1 (₹)</TableHead>
+                        <TableHead className="text-right">Term 2 (₹)</TableHead>
+                        <TableHead className="text-right">Total School Fees (₹)</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {schoolFees.map(fee => (
+                        <TableRow key={fee.class}>
+                            <TableCell className="font-medium">{fee.class}</TableCell>
+                            <TableCell className="text-right">{fee.term1.toLocaleString()}</TableCell>
+                            <TableCell className="text-right">{fee.term2.toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-bold">{fee.total.toLocaleString()}</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+          </CardContent>
         </Card>
 
 
