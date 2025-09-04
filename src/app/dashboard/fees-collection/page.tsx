@@ -17,10 +17,10 @@ export default async function FeesCollectionPage() {
   // This is a placeholder for more detailed fee structures
   // In a real app, this would come from the database per student
   const feeCategories = [
-    { id: 'tuition', name: 'School Fees', totalAmount: 20000, class: 'All', village: 'All' },
-    { id: 'bus', name: 'Bus Fees', totalAmount: 5000, class: 'All', village: 'All' },
-    { id: 'fine', name: 'Fine', totalAmount: 500, class: 'All', village: 'All' },
-    { id: 'remark', name: 'Remark', totalAmount: 300, class: 'All', village: 'All' },
+    { id: 'school', name: 'School Fees', totalAmount: 20000 },
+    { id: 'bus', name: 'Bus Fees', totalAmount: 5000 },
+    { id: 'fine', name: 'Fine', totalAmount: 500 },
+    { id: 'remark', name: 'Remark', totalAmount: 300 },
   ];
 
   return (
@@ -48,3 +48,6 @@ export default async function FeesCollectionPage() {
     </main>
   );
 }
+
+
+    

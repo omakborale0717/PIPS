@@ -128,7 +128,7 @@ export default function FeesCollectionClient({
               0
             );
           }
-          if (cat.id === 'tuition') paidAmount = 10000;
+          if (cat.id === 'school') paidAmount = 10000;
 
           const balance = cat.totalAmount - paidAmount;
           return {
@@ -138,8 +138,8 @@ export default function FeesCollectionClient({
             paidAmount,
             dueAmount: balance > 0 ? balance : 0,
             balance: balance,
-            class: cat.class || student.class,
-            village: cat.village || student.village,
+            class: student.class,
+            village: student.village,
           };
         });
         setStudentFeeDetails(details);
@@ -224,6 +224,8 @@ export default function FeesCollectionClient({
   });
   
   const uniqueClasses = ['all', ...Array.from(new Set(students.map(s => s.class)))];
+  const uniqueVillages = [...Array.from(new Set(students.map(s => s.village)))];
+
   
   const filteredStudents = useMemo(() => {
       if(selectedClass === 'all') return students;
@@ -392,7 +394,7 @@ export default function FeesCollectionClient({
                 </TableRow>
                 </TableHeader>
                 <TableBody>
-                {studentFeeDetails.map((fee) => (
+                {studentFeeDetails.map((fee, index) => (
                     <TableRow key={fee.id}>
                     <TableCell>
                         <Checkbox
@@ -411,8 +413,44 @@ export default function FeesCollectionClient({
                         {getCategoryIcon(fee.name)}
                         {fee.name}
                     </TableCell>
-                     <TableCell>{fee.class}</TableCell>
-                     <TableCell>{fee.village}</TableCell>
+                    <TableCell>
+                        <Select
+                            value={fee.class}
+                            onValueChange={(value) => {
+                                const newDetails = [...studentFeeDetails];
+                                newDetails[index].class = value;
+                                setStudentFeeDetails(newDetails);
+                            }}
+                        >
+                            <SelectTrigger className="w-[120px]">
+                                <SelectValue placeholder="Select Class" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {uniqueClasses.filter(c => c !== 'all').map(c => (
+                                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </TableCell>
+                     <TableCell>
+                        <Select
+                            value={fee.village}
+                            onValueChange={(value) => {
+                                const newDetails = [...studentFeeDetails];
+                                newDetails[index].village = value;
+                                setStudentFeeDetails(newDetails);
+                            }}
+                        >
+                            <SelectTrigger className="w-[150px]">
+                                <SelectValue placeholder="Select Village" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {uniqueVillages.map(v => (
+                                    <SelectItem key={v} value={v}>{v}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                     </TableCell>
                     <TableCell className="text-right">
                         {fee.totalAmount.toLocaleString()}
                     </TableCell>
@@ -474,5 +512,7 @@ export default function FeesCollectionClient({
     </div>
   );
 }
+
+    
 
     
