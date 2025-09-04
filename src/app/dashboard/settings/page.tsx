@@ -69,11 +69,11 @@ export default async function SettingsPage() {
                         <>
                          <div className="flex items-center justify-between">
                             <span className="text-muted-foreground flex items-center gap-2"><IndianRupee className="h-4 w-4" /> Monthly Fee</span>
-                            <span className="font-medium">₹{busFeesSettings.monthlyFee.toLocaleString()}</span>
+                            <span className="font-medium">₹{busFeesSettings.monthlyFee?.toLocaleString() ?? 'N/A'}</span>
                         </div>
                          <div className="flex items-center justify-between">
                             <span className="text-muted-foreground flex items-center gap-2"><BadgePercent className="h-4 w-4" /> Late Fee</span>
-                            <span className="font-medium">₹{busFeesSettings.lateFee.toLocaleString()}</span>
+                            <span className="font-medium">₹{busFeesSettings.lateFee?.toLocaleString() ?? 'N/A'}</span>
                         </div>
                         </>
                     ) : (
