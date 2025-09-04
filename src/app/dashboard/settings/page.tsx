@@ -6,11 +6,19 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { getGeneralSettingsAction, getBusFeesSettingsAction, getProfileSettingsAction } from '@/app/actions';
+import { getGeneralSettingsAction, getBusFeesSettingsAction, getProfileSettingsAction, getVillageFeesAction } from '@/app/actions';
 import { KeyRound, Building, Bus, Palette, Bell, BadgePercent, IndianRupee, Phone, MapPin } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 
 export default async function SettingsPage() {
@@ -18,6 +26,7 @@ export default async function SettingsPage() {
   const generalSettings = await getGeneralSettingsAction();
   const busFeesSettings = await getBusFeesSettingsAction();
   const profileSettings = await getProfileSettingsAction();
+  const villageFees = await getVillageFeesAction();
 
   return (
     <main className="flex-1 p-4 md:p-6 lg:p-8">
@@ -62,23 +71,50 @@ export default async function SettingsPage() {
                         <Bus className="h-5 w-5 text-primary" />
                         Bus Fees
                     </CardTitle>
-                    <CardDescription>Manage bus fee structure.</CardDescription>
+                    <CardDescription>Manage default and village-specific fee structures.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    {busFeesSettings ? (
-                        <>
-                         <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground flex items-center gap-2"><IndianRupee className="h-4 w-4" /> Monthly Fee</span>
-                            <span className="font-medium">₹{busFeesSettings.monthlyFee?.toLocaleString() ?? 'N/A'}</span>
-                        </div>
-                         <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground flex items-center gap-2"><BadgePercent className="h-4 w-4" /> Late Fee</span>
-                            <span className="font-medium">₹{busFeesSettings.lateFee?.toLocaleString() ?? 'N/A'}</span>
-                        </div>
-                        </>
-                    ) : (
-                        <p className="text-sm text-muted-foreground">Bus fee settings not found.</p>
-                    )}
+                <CardContent className="space-y-6">
+                    <div>
+                        <h4 className="font-medium mb-2 text-sm text-muted-foreground">Default Fees</h4>
+                        {busFeesSettings ? (
+                            <div className="space-y-4">
+                             <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground flex items-center gap-2"><IndianRupee className="h-4 w-4" /> Monthly Fee</span>
+                                <span className="font-medium">₹{busFeesSettings.monthlyFee?.toLocaleString() ?? 'N/A'}</span>
+                            </div>
+                             <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground flex items-center gap-2"><BadgePercent className="h-4 w-4" /> Late Fee</span>
+                                <span className="font-medium">₹{busFeesSettings.lateFee?.toLocaleString() ?? 'N/A'}</span>
+                            </div>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Default bus fee settings not found.</p>
+                        )}
+                    </div>
+                    <Separator />
+                     <div>
+                        <h4 className="font-medium mb-2 text-sm text-muted-foreground">Village-Specific Fees</h4>
+                        {villageFees.length > 0 ? (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Village</TableHead>
+                                        <TableHead className="text-right">Amount</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {villageFees.map(fee => (
+                                        <TableRow key={fee.id}>
+                                            <TableCell className="font-medium">{fee.villageName}</TableCell>
+                                            <TableCell className="text-right">₹{fee.feeAmount.toLocaleString()}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        ) : (
+                             <p className="text-sm text-muted-foreground text-center py-4">No village-specific fees found.</p>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
 
