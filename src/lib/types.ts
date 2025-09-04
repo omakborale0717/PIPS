@@ -92,6 +92,14 @@ export type VillageFee = {
     feeAmount: number;
 }
 
+export type SchoolFee = {
+  id: string;
+  class: string;
+  term1: number;
+  term2: number;
+  total: number;
+}
+
 export type RealTimeBusLocation = {
     busId: string;
     lat: number;

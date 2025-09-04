@@ -2,7 +2,7 @@
 'use server';
 import { analyzeBusDisruptions } from '@/ai/flows/analyze-bus-disruptions';
 import { hashPassword } from '@/lib/crypto';
-import type { Student, BusRoute, DieselEntry, DailyLog, Arrival, ServiceHistory, GeneralSettings, BusFeesSettings, ProfileSettings, BusFeePayment, VillageFee } from '@/lib/types';
+import type { Student, BusRoute, DieselEntry, DailyLog, Arrival, ServiceHistory, GeneralSettings, BusFeesSettings, ProfileSettings, BusFeePayment, VillageFee, SchoolFee } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/firebase';
 import { ref, get, set, push, remove, update } from 'firebase/database';
@@ -80,6 +80,13 @@ export async function getVillageFeesAction(): Promise<VillageFee[]> {
     const snapshot = await get(feesRef);
     return snapshotToData<VillageFee>(snapshot);
 }
+
+export async function getSchoolFeesAction(): Promise<SchoolFee[]> {
+    const feesRef = ref(db, 'schoolFees');
+    const snapshot = await get(feesRef);
+    return snapshotToData<SchoolFee>(snapshot);
+}
+
 
 export async function getBusFeePaymentsAction(): Promise<BusFeePayment[]> {
     const paymentsRef = ref(db, 'busFeePayments');
@@ -315,6 +322,7 @@ export async function addVillageFeeAction(fee: Omit<VillageFee, 'id'>) {
         const newVillageFeeId = newVillageFeeRef.key;
 
         revalidatePath('/dashboard/village-fees');
+        revalidatePath('/dashboard/settings');
         return { success: true, data: { id: newVillageFeeId!, ...fee } };
     } catch (error) {
         console.error('Error adding village fee:', error);
@@ -322,6 +330,24 @@ export async function addVillageFeeAction(fee: Omit<VillageFee, 'id'>) {
             return { success: false, error: error.message };
         }
         return { success: false, error: 'Failed to add village fee.' };
+    }
+}
+
+export async function addSchoolFeeAction(fee: Omit<SchoolFee, 'id'>) {
+    try {
+        const schoolFeesRef = ref(db, 'schoolFees');
+        const newSchoolFeeRef = push(schoolFeesRef);
+        await set(newSchoolFeeRef, fee);
+        const newSchoolFeeId = newSchoolFeeRef.key;
+
+        revalidatePath('/dashboard/settings');
+        return { success: true, data: { id: newSchoolFeeId!, ...fee } };
+    } catch (error) {
+        console.error('Error adding school fee:', error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to add school fee.' };
     }
 }
 
