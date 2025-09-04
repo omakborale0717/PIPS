@@ -79,11 +79,11 @@ export default async function SettingsPage() {
                         {busFeesSettings ? (
                             <div className="space-y-4">
                              <div className="flex items-center justify-between">
-                                <span className="text-muted-foreground flex items-center gap-2"><IndianRupee className="h-4 w-4" /> Monthly Fee</span>
+                                <span className="text-muted-foreground flex items-center gap-2"><IndianRupee className="h-4 w-4" /> Term 1</span>
                                 <span className="font-medium">₹{busFeesSettings.monthlyFee?.toLocaleString() ?? 'N/A'}</span>
                             </div>
                              <div className="flex items-center justify-between">
-                                <span className="text-muted-foreground flex items-center gap-2"><BadgePercent className="h-4 w-4" /> Late Fee</span>
+                                <span className="text-muted-foreground flex items-center gap-2"><BadgePercent className="h-4 w-4" /> Term 2</span>
                                 <span className="font-medium">₹{busFeesSettings.lateFee?.toLocaleString() ?? 'N/A'}</span>
                             </div>
                             </div>
@@ -99,14 +99,16 @@ export default async function SettingsPage() {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Village</TableHead>
-                                        <TableHead className="text-right">Amount</TableHead>
+                                        <TableHead className="text-right">Term 1</TableHead>
+                                        <TableHead className="text-right">Term 2</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {villageFees.map(fee => (
                                         <TableRow key={fee.id}>
                                             <TableCell className="font-medium">{fee.villageName}</TableCell>
-                                            <TableCell className="text-right">₹{fee.feeAmount.toLocaleString()}</TableCell>
+                                            <TableCell className="text-right">₹{(fee.feeAmount / 2).toLocaleString()}</TableCell>
+                                            <TableCell className="text-right">₹{(fee.feeAmount / 2).toLocaleString()}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
