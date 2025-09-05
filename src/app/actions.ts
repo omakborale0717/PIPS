@@ -403,6 +403,39 @@ export async function addVillageFeeAction(fee: Omit<VillageFee, 'id'>) {
     }
 }
 
+export async function updateVillageFeeAction(fee: VillageFee) {
+    try {
+        const feeRef = ref(db, `villageFees/${fee.id}`);
+        const { id, ...feeData } = fee;
+        await update(feeRef, feeData);
+        revalidatePath('/dashboard/village-fees');
+        revalidatePath('/dashboard/settings');
+        return { success: true, data: fee };
+    } catch (error) {
+        console.error('Error updating village fee:', error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to update village fee.' };
+    }
+}
+
+export async function deleteVillageFeeAction(feeId: string) {
+    try {
+        const feeRef = ref(db, `villageFees/${feeId}`);
+        await remove(feeRef);
+        revalidatePath('/dashboard/village-fees');
+        revalidatePath('/dashboard/settings');
+        return { success: true, data: { id: feeId } };
+    } catch (error) {
+        console.error('Error deleting village fee:', error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to delete village fee.' };
+    }
+}
+
 export async function addSchoolFeeAction(fee: Omit<SchoolFee, 'id'>) {
     try {
         const schoolFeesRef = ref(db, 'schoolFees');
@@ -455,3 +488,5 @@ export async function getAllDataAsJsonAction() {
         return { success: false, error: 'An unknown error occurred while exporting data.' };
     }
 }
+
+    

@@ -18,7 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { MapPinned, PlusCircle, IndianRupee } from 'lucide-react';
+import { MapPinned, PlusCircle, IndianRupee, MoreVertical, Loader2, Trash } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -27,10 +27,27 @@ import {
   DialogTrigger,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import type { VillageFee } from '@/lib/types';
 import AddVillageFeeForm from './add-village-fee-form';
+import EditVillageFeeForm from './edit-village-fee-form';
 import { toast } from '@/hooks/use-toast';
-import { addVillageFeeAction } from '@/app/actions';
+import { addVillageFeeAction, deleteVillageFeeAction } from '@/app/actions';
 
 type VillageFeesClientProps = {
   initialFees: VillageFee[];
@@ -38,7 +55,11 @@ type VillageFeesClientProps = {
 
 export default function VillageFeesClient({ initialFees }: VillageFeesClientProps) {
   const [fees, setFees] = useState<VillageFee[]>(initialFees);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedFee, setSelectedFee] = useState<VillageFee | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleAddFee = async (values: Omit<VillageFee, 'id'>) => {
     const result = await addVillageFeeAction(values);
@@ -48,7 +69,7 @@ export default function VillageFeesClient({ initialFees }: VillageFeesClientProp
         title: 'Fee Added',
         description: `Successfully added fee for ${values.villageName}.`,
       });
-      setIsDialogOpen(false);
+      setIsAddDialogOpen(false);
     } else {
       toast({
         variant: 'destructive',
@@ -57,6 +78,47 @@ export default function VillageFeesClient({ initialFees }: VillageFeesClientProp
       });
     }
   };
+
+  const handleEditClick = (fee: VillageFee) => {
+    setSelectedFee(fee);
+    setIsEditDialogOpen(true);
+  };
+  
+  const handleFeeUpdated = (updatedFee: VillageFee) => {
+    setFees(prev => prev.map(f => f.id === updatedFee.id ? updatedFee : f));
+    setIsEditDialogOpen(false);
+    setSelectedFee(null);
+  };
+
+  const handleDeleteClick = (fee: VillageFee) => {
+    setSelectedFee(fee);
+    setIsDeleteDialogOpen(true);
+  }
+
+  const confirmDelete = async () => {
+    if (!selectedFee) return;
+
+    setIsDeleting(true);
+    const result = await deleteVillageFeeAction(selectedFee.id);
+    setIsDeleting(false);
+
+    if(result.success) {
+        toast({
+            title: "Fee Deleted",
+            description: `Fee for ${selectedFee.villageName} has been deleted.`
+        });
+        setFees(prev => prev.filter(f => f.id !== selectedFee.id));
+        setIsDeleteDialogOpen(false);
+        setSelectedFee(null);
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: result.error
+        });
+    }
+  }
+
 
   return (
     <>
@@ -71,7 +133,7 @@ export default function VillageFeesClient({ initialFees }: VillageFeesClientProp
               Define and manage bus fee structures based on village locations.
             </CardDescription>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <PlusCircle className="mr-2" />
@@ -95,6 +157,7 @@ export default function VillageFeesClient({ initialFees }: VillageFeesClientProp
               <TableRow>
                 <TableHead>Village Name</TableHead>
                 <TableHead className="text-right">Fee Amount</TableHead>
+                <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -105,11 +168,32 @@ export default function VillageFeesClient({ initialFees }: VillageFeesClientProp
                      <IndianRupee className="h-4 w-4" /> 
                     {fee.feeAmount.toLocaleString()}
                   </TableCell>
+                  <TableCell>
+                     <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditClick(fee)}>
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteClick(fee)}
+                          className="text-destructive"
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))}
               {fees.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={2} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={3} className="text-center py-12 text-muted-foreground">
                     No village-specific fees have been added yet.
                   </TableCell>
                 </TableRow>
@@ -118,6 +202,40 @@ export default function VillageFeesClient({ initialFees }: VillageFeesClientProp
           </Table>
         </CardContent>
       </Card>
+      
+      {/* Edit Dialog */}
+       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Village Fee</DialogTitle>
+            <DialogDescription>
+              Update the fee for {selectedFee?.villageName}.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedFee && <EditVillageFeeForm fee={selectedFee} onFeeUpdated={handleFeeUpdated} />}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Alert Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the fee for <span className="font-semibold">{selectedFee?.villageName}</span>.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash className="mr-2 h-4 w-4" />}
+                    Delete
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
+
+    
