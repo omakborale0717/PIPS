@@ -147,32 +147,56 @@ export default function FeesCollectionClient({
         const busFeeAmount = student.usesBus ? (villageFees.find(vf => vf.villageName === student.village)?.feeAmount || 0) : 0;
         const busPaidAmount = studentPayments.reduce((acc, p) => acc + p.amountPaid, 0);
 
-        const feeCategories: FeeCategory[] = [
-            { id: 'school', name: 'School Fees', defaultAmount: schoolFeeAmount },
-            { id: 'bus', name: 'Bus Fees', defaultAmount: busFeeAmount },
-            ...otherFeeCategories,
-        ];
-        
-        const details = feeCategories.map((cat) => {
-          let paidAmount = 0;
-          if (cat.id === 'bus') {
-            paidAmount = busPaidAmount;
-          }
-          // Placeholder for other fees paid
-          if (cat.id !== 'bus') paidAmount = 0; 
-
-          const balance = cat.defaultAmount - paidAmount;
-          return {
-            id: cat.id,
-            name: cat.name,
-            totalAmount: cat.defaultAmount,
-            paidAmount,
-            dueAmount: balance > 0 ? balance : 0,
-            balance: balance,
-            class: student.class,
-            village: student.village,
-          };
+        const feeCategoriesForStudent: FeeCategory[] = otherFeeCategories.filter(cat => {
+          const classMatch = !cat.class || cat.class === student.class;
+          const villageMatch = !cat.village || cat.village === student.village;
+          return classMatch && villageMatch;
         });
+
+        const details: FeeDetails[] = [];
+
+        const schoolFeeDetail: FeeDetails = {
+             id: 'school',
+             name: 'School Fees',
+             totalAmount: schoolFeeAmount,
+             paidAmount: 0, // Placeholder
+             dueAmount: schoolFeeAmount, // Placeholder
+             balance: schoolFeeAmount, // Placeholder
+             class: student.class,
+             village: student.village,
+        };
+        details.push(schoolFeeDetail);
+        
+        if (student.usesBus) {
+            const busFeeDetail: FeeDetails = {
+                id: 'bus',
+                name: 'Bus Fees',
+                totalAmount: busFeeAmount,
+                paidAmount: busPaidAmount,
+                dueAmount: busFeeAmount - busPaidAmount > 0 ? busFeeAmount - busPaidAmount : 0,
+                balance: busFeeAmount - busPaidAmount,
+                class: student.class,
+                village: student.village,
+            };
+            details.push(busFeeDetail);
+        }
+
+        feeCategoriesForStudent.forEach(cat => {
+            const totalAmount = (cat.term1 || 0) + (cat.term2 || 0);
+            const paidAmount = 0; // Placeholder for other fee payments
+            const balance = totalAmount - paidAmount;
+            details.push({
+                id: cat.id,
+                name: cat.name,
+                totalAmount: totalAmount,
+                paidAmount: paidAmount,
+                dueAmount: balance > 0 ? balance : 0,
+                balance: balance,
+                class: cat.class || student.class,
+                village: cat.village || student.village,
+            });
+        });
+
         setStudentFeeDetails(details);
         toast({ title: 'Student Found', description: `Displaying details for ${student.name}` });
       } else {
@@ -201,11 +225,11 @@ export default function FeesCollectionClient({
   const totalPayable = useMemo(() => {
     return studentFeeDetails
       .filter((fee) => selectedFeeIds.includes(fee.id))
-      .reduce((acc, fee) => acc + fee.dueAmount, 0);
+      .reduce((acc, fee) => acc + (fee.dueAmount || 0), 0);
   }, [studentFeeDetails, selectedFeeIds]);
 
   const totalFees = useMemo(() => {
-    return studentFeeDetails.reduce((acc, fee) => acc + fee.totalAmount, 0);
+    return studentFeeDetails.reduce((acc, fee) => acc + (fee.totalAmount || 0), 0);
   }, [studentFeeDetails]);
 
 
@@ -438,10 +462,10 @@ export default function FeesCollectionClient({
                 <TableRow>
                     <TableHead className="w-[50px]">
                     <Checkbox
-                        checked={selectedFeeIds.length === studentFeeDetails.filter(f => f.dueAmount > 0).length && studentFeeDetails.filter(f => f.dueAmount > 0).length > 0}
+                        checked={selectedFeeIds.length === studentFeeDetails.filter(f => (f.dueAmount || 0) > 0).length && studentFeeDetails.filter(f => (f.dueAmount || 0) > 0).length > 0}
                         onCheckedChange={(checked) => {
                         setSelectedFeeIds(
-                            checked ? studentFeeDetails.filter(f => f.dueAmount > 0).map((fee) => fee.id) : []
+                            checked ? studentFeeDetails.filter(f => (f.dueAmount || 0) > 0).map((fee) => fee.id) : []
                         );
                         }}
                     />
@@ -461,7 +485,7 @@ export default function FeesCollectionClient({
                     <TableCell>
                         <Checkbox
                         checked={selectedFeeIds.includes(fee.id)}
-                        disabled={fee.dueAmount <= 0}
+                        disabled={(fee.dueAmount || 0) <= 0}
                         onCheckedChange={(checked) => {
                             setSelectedFeeIds(
                             checked
@@ -508,16 +532,16 @@ export default function FeesCollectionClient({
                         </Select>
                      </TableCell>
                     <TableCell className="text-right">
-                        {fee.totalAmount.toLocaleString()}
+                        {(fee.totalAmount || 0).toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right font-semibold text-red-600">
-                        {fee.dueAmount.toLocaleString()}
+                        {(fee.dueAmount || 0).toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right text-green-600">
-                        {fee.paidAmount.toLocaleString()}
+                        {(fee.paidAmount || 0).toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right">
-                        {fee.balance.toLocaleString()}
+                        {(fee.balance || 0).toLocaleString()}
                     </TableCell>
                     </TableRow>
                 ))}
@@ -531,7 +555,7 @@ export default function FeesCollectionClient({
               <CardTitle>Payment Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6 max-w-md">
+              <div className="space-y-6 max-w-sm">
                  <div>
                   <Label htmlFor="receipt-number">Receipt Number</Label>
                   <div className="relative mt-2">
