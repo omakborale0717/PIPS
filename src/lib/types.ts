@@ -109,6 +109,8 @@ export type FeeCategory = {
   id: string;
   name: string;
   defaultAmount: number;
+  class?: string;
+  village?: string;
 }
 
 export type RealTimeBusLocation = {

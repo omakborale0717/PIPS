@@ -70,7 +70,11 @@ export default async function SettingsPage() {
 
         <SchoolFeesClient initialFees={schoolFees} />
         
-        <FeeCategoriesClient initialCategories={feeCategories} />
+        <FeeCategoriesClient 
+            initialCategories={feeCategories} 
+            schoolFees={schoolFees}
+            villageFees={villageFees}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <Card>

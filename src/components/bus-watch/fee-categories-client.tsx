@@ -43,17 +43,20 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import type { FeeCategory } from '@/lib/types';
+import type { FeeCategory, SchoolFee, VillageFee } from '@/lib/types';
 import AddFeeCategoryForm from './add-fee-category-form';
 import EditFeeCategoryForm from './edit-fee-category-form';
 import { toast } from '@/hooks/use-toast';
 import { addFeeCategoryAction, updateFeeCategoryAction, deleteFeeCategoryAction } from '@/app/actions';
+import { Badge } from '../ui/badge';
 
 type FeeCategoriesClientProps = {
   initialCategories: FeeCategory[];
+  schoolFees: SchoolFee[];
+  villageFees: VillageFee[];
 };
 
-export default function FeeCategoriesClient({ initialCategories }: FeeCategoriesClientProps) {
+export default function FeeCategoriesClient({ initialCategories, schoolFees, villageFees }: FeeCategoriesClientProps) {
   const [categories, setCategories] = useState<FeeCategory[]>(initialCategories);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -159,7 +162,11 @@ export default function FeeCategoriesClient({ initialCategories }: FeeCategories
                   Define a new category for fee collection.
                 </DialogDescription>
               </DialogHeader>
-              <AddFeeCategoryForm onAddCategory={handleAddCategory} />
+              <AddFeeCategoryForm 
+                onAddCategory={handleAddCategory} 
+                schoolFees={schoolFees}
+                villageFees={villageFees}
+              />
             </DialogContent>
           </Dialog>
         </CardHeader>
@@ -168,6 +175,8 @@ export default function FeeCategoriesClient({ initialCategories }: FeeCategories
             <TableHeader>
               <TableRow>
                 <TableHead>Category Name</TableHead>
+                <TableHead>Class</TableHead>
+                <TableHead>Village</TableHead>
                 <TableHead className="text-right">Default Amount (₹)</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
@@ -176,6 +185,8 @@ export default function FeeCategoriesClient({ initialCategories }: FeeCategories
               {categories.map((category) => (
                 <TableRow key={category.id}>
                   <TableCell className="font-medium">{category.name}</TableCell>
+                  <TableCell>{category.class ? <Badge variant="outline">{category.class}</Badge> : 'N/A'}</TableCell>
+                  <TableCell>{category.village ? <Badge variant="outline">{category.village}</Badge> : 'N/A'}</TableCell>
                   <TableCell className="text-right">
                     {category.defaultAmount.toLocaleString()}
                   </TableCell>
@@ -204,7 +215,7 @@ export default function FeeCategoriesClient({ initialCategories }: FeeCategories
               ))}
               {categories.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                     No custom fee categories have been added yet.
                   </TableCell>
                 </TableRow>
@@ -222,7 +233,14 @@ export default function FeeCategoriesClient({ initialCategories }: FeeCategories
               Update the details for the "{selectedCategory?.name}" category.
             </DialogDescription>
           </DialogHeader>
-          {selectedCategory && <EditFeeCategoryForm category={selectedCategory} onUpdateCategory={handleCategoryUpdated} />}
+          {selectedCategory && (
+            <EditFeeCategoryForm 
+                category={selectedCategory} 
+                onUpdateCategory={handleCategoryUpdated} 
+                schoolFees={schoolFees}
+                villageFees={villageFees}
+            />
+          )}
         </DialogContent>
       </Dialog>
       
