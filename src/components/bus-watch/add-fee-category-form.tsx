@@ -53,7 +53,12 @@ export default function AddFeeCategoryForm({ onAddCategory, schoolFees, villageF
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    await onAddCategory(values);
+    const categoryData = {
+        ...values,
+        class: values.class === 'all-classes' ? '' : values.class,
+        village: values.village === 'all-villages' ? '' : values.village,
+    }
+    await onAddCategory(categoryData);
     setIsLoading(false);
     form.reset();
   }
@@ -102,7 +107,7 @@ export default function AddFeeCategoryForm({ onAddCategory, schoolFees, villageF
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">All classes</SelectItem>
+                      <SelectItem value="all-classes">All classes</SelectItem>
                       {schoolFees.map(fee => (
                         <SelectItem key={fee.id} value={fee.class}>{fee.class}</SelectItem>
                       ))}
@@ -125,7 +130,7 @@ export default function AddFeeCategoryForm({ onAddCategory, schoolFees, villageF
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                       <SelectItem value="">All villages</SelectItem>
+                       <SelectItem value="all-villages">All villages</SelectItem>
                       {villageFees.map(fee => (
                         <SelectItem key={fee.id} value={fee.villageName}>{fee.villageName}</SelectItem>
                       ))}

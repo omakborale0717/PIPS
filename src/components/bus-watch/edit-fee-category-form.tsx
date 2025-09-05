@@ -47,8 +47,8 @@ export default function EditFeeCategoryForm({ category, onUpdateCategory, school
     defaultValues: {
       name: category.name,
       defaultAmount: category.defaultAmount,
-      class: category.class || "",
-      village: category.village || "",
+      class: category.class || "all-classes",
+      village: category.village || "all-villages",
     },
   });
 
@@ -56,7 +56,9 @@ export default function EditFeeCategoryForm({ category, onUpdateCategory, school
     setIsLoading(true);
     const updatedCategory: FeeCategory = {
         ...category,
-        ...values
+        ...values,
+        class: values.class === 'all-classes' ? undefined : values.class,
+        village: values.village === 'all-villages' ? undefined : values.village,
     };
     await onUpdateCategory(updatedCategory);
     setIsLoading(false);
@@ -106,7 +108,7 @@ export default function EditFeeCategoryForm({ category, onUpdateCategory, school
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">All classes</SelectItem>
+                      <SelectItem value="all-classes">All classes</SelectItem>
                       {schoolFees.map(fee => (
                         <SelectItem key={fee.id} value={fee.class}>{fee.class}</SelectItem>
                       ))}
@@ -129,7 +131,7 @@ export default function EditFeeCategoryForm({ category, onUpdateCategory, school
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                       <SelectItem value="">All villages</SelectItem>
+                       <SelectItem value="all-villages">All villages</SelectItem>
                       {villageFees.map(fee => (
                         <SelectItem key={fee.id} value={fee.villageName}>{fee.villageName}</SelectItem>
                       ))}
