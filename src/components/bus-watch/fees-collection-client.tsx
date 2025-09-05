@@ -49,7 +49,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import type { Student, SchoolFee, VillageFee, BusFeePayment, FeeCategory } from '@/lib/types';
+import type { Student, SchoolFee, VillageFee, BusFeePayment } from '@/lib/types';
 import { addBusFeePayment } from '@/app/actions';
 import { Label } from '@/components/ui/label';
 
@@ -68,6 +68,15 @@ type FeeDetails = {
   class?: string;
   village?: string;
 };
+
+// A fee category can be 'school', 'bus', or 'fine'
+// Redefining a simple version here as the main one from types.ts was removed.
+type FeeCategory = {
+    id: string;
+    name: string;
+    totalAmount: number;
+}
+
 
 type FeesCollectionClientProps = {
   students: Student[];
@@ -204,9 +213,7 @@ export default function FeesCollectionClient({
   }, [studentFeeDetails, selectedFeeIds]);
 
   const totalFees = useMemo(() => {
-    const schoolFee = studentFeeDetails.find(fee => fee.id === 'school')?.totalAmount || 0;
-    const busFee = studentFeeDetails.find(fee => fee.id === 'bus')?.totalAmount || 0;
-    return schoolFee + busFee;
+    return studentFeeDetails.reduce((acc, fee) => acc + fee.totalAmount, 0);
   }, [studentFeeDetails]);
 
 
@@ -532,8 +539,8 @@ export default function FeesCollectionClient({
               <CardTitle>Payment Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                <div className="md:col-span-1">
+              <div className="space-y-6 max-w-md">
+                 <div>
                   <Label htmlFor="receipt-number">Receipt Number</Label>
                   <div className="relative mt-2">
                      <Receipt className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -546,41 +553,38 @@ export default function FeesCollectionClient({
                     />
                   </div>
                 </div>
-                 <div className="md:col-span-2 grid grid-cols-1 gap-4">
-                     <div>
-                        <Label>Total Fees</Label>
-                        <p className="text-2xl font-bold mt-2">₹{totalFees.toLocaleString()}</p>
-                    </div>
-                 </div>
-              </div>
-                <Separator className="my-6" />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <Label htmlFor="amount-to-pay">Amount to Pay</Label>
-                        <div className="relative mt-2">
-                            <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                            id="amount-to-pay"
-                            type="number"
-                            placeholder="Enter amount"
-                            value={amountToPay}
-                            onChange={(e) => setAmountToPay(Number(e.target.value))}
-                            className="pl-8 text-lg font-semibold"
-                            />
-                        </div>
-                    </div>
-                    <div className="flex flex-col md:flex-row gap-2 justify-end items-end">
-                        <Button onClick={handlePaymentSubmit} disabled={amountToPay <= 0}>
-                            <Save className="mr-2 h-4 w-4" />
-                            Submit Payment
-                        </Button>
-                        <Button onClick={handleGenerateReceipt} variant="outline" disabled={amountToPay <= 0}>
-                            <Printer className="mr-2 h-4 w-4" />
-                            Generate Receipt
-                        </Button>
+                <div>
+                    <Label>Total Fees</Label>
+                    <p className="text-2xl font-bold mt-1">₹{totalFees.toLocaleString()}</p>
+                </div>
+
+                <div>
+                    <Label htmlFor="amount-to-pay">Amount to Pay</Label>
+                    <div className="relative mt-2">
+                        <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                        id="amount-to-pay"
+                        type="number"
+                        placeholder="Enter amount"
+                        value={amountToPay}
+                        onChange={(e) => setAmountToPay(Number(e.target.value))}
+                        className="pl-8 text-lg font-semibold"
+                        />
                     </div>
                 </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                    <Button onClick={handlePaymentSubmit} disabled={amountToPay <= 0} className="w-full sm:w-auto">
+                        <Save className="mr-2 h-4 w-4" />
+                        Submit Payment
+                    </Button>
+                    <Button onClick={handleGenerateReceipt} variant="outline" disabled={amountToPay <= 0} className="w-full sm:w-auto">
+                        <Printer className="mr-2 h-4 w-4" />
+                        Generate Receipt
+                    </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </>
