@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -49,7 +49,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import type { Student } from '@/lib/types';
+import type { Student, SchoolFee, VillageFee } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Label } from '../ui/label';
 
@@ -62,8 +62,6 @@ export type FeeCategory = {
   id: string;
   name: string;
   totalAmount: number;
-  class?: string;
-  village?: string;
 };
 
 type FeeDetails = {
@@ -80,13 +78,17 @@ type FeeDetails = {
 type FeesCollectionClientProps = {
   students: Student[];
   payments: any[]; // Using any for payments for now
-  feeCategories: FeeCategory[];
+  schoolFees: SchoolFee[];
+  villageFees: VillageFee[];
+  otherFeeCategories: FeeCategory[];
 };
 
 export default function FeesCollectionClient({
   students,
   payments,
-  feeCategories,
+  schoolFees,
+  villageFees,
+  otherFeeCategories,
 }: FeesCollectionClientProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -110,6 +112,31 @@ export default function FeesCollectionClient({
   const getStudentPayments = (studentId: string) => {
     return payments.filter((p) => p.studentId === studentId);
   };
+  
+  const handleFeeDetailChange = (index: number, field: 'class' | 'village', value: string) => {
+    const newDetails = [...studentFeeDetails];
+    const detail = newDetails[index];
+    
+    if (detail.id === 'school' && field === 'class') {
+      const schoolFee = schoolFees.find(sf => sf.class === value);
+      detail.totalAmount = schoolFee ? schoolFee.total : 0;
+    }
+    
+    if (detail.id === 'bus' && field === 'village') {
+       const villageFee = villageFees.find(vf => vf.villageName === value);
+       detail.totalAmount = villageFee ? villageFee.feeAmount : 0;
+    }
+    
+    const balance = detail.totalAmount - detail.paidAmount;
+    detail.balance = balance;
+    detail.dueAmount = balance > 0 ? balance : 0;
+
+    if (field === 'class') detail.class = value;
+    if (field === 'village') detail.village = value;
+
+    setStudentFeeDetails(newDetails);
+  };
+
 
   const handleSearch = (values: z.infer<typeof searchSchema>) => {
     setIsSearching(true);
@@ -119,16 +146,24 @@ export default function FeesCollectionClient({
       if (student) {
         setSelectedStudent(student);
         const studentPayments = getStudentPayments(student.id);
+        
+        const schoolFeeAmount = schoolFees.find(sf => sf.class === student.class)?.total || 0;
+        const busFeeAmount = student.usesBus ? (villageFees.find(vf => vf.villageName === student.village)?.feeAmount || 0) : 0;
+        const busPaidAmount = studentPayments.reduce((acc, p) => acc + p.amountPaid, 0);
 
+        const feeCategories: FeeCategory[] = [
+            { id: 'school', name: 'School Fees', totalAmount: schoolFeeAmount },
+            { id: 'bus', name: 'Bus Fees', totalAmount: busFeeAmount },
+            ...otherFeeCategories,
+        ];
+        
         const details = feeCategories.map((cat) => {
           let paidAmount = 0;
           if (cat.id === 'bus') {
-            paidAmount = studentPayments.reduce(
-              (acc, p) => acc + p.amountPaid,
-              0
-            );
+            paidAmount = busPaidAmount;
           }
-          if (cat.id === 'school') paidAmount = 10000;
+          // Placeholder for school fees paid
+          if (cat.id === 'school') paidAmount = 0; 
 
           const balance = cat.totalAmount - paidAmount;
           return {
@@ -416,11 +451,8 @@ export default function FeesCollectionClient({
                     <TableCell>
                         <Select
                             value={fee.class}
-                            onValueChange={(value) => {
-                                const newDetails = [...studentFeeDetails];
-                                newDetails[index].class = value;
-                                setStudentFeeDetails(newDetails);
-                            }}
+                            onValueChange={(value) => handleFeeDetailChange(index, 'class', value)}
+                            disabled={fee.id !== 'school'}
                         >
                             <SelectTrigger className="w-[120px]">
                                 <SelectValue placeholder="Select Class" />
@@ -435,11 +467,8 @@ export default function FeesCollectionClient({
                      <TableCell>
                         <Select
                             value={fee.village}
-                            onValueChange={(value) => {
-                                const newDetails = [...studentFeeDetails];
-                                newDetails[index].village = value;
-                                setStudentFeeDetails(newDetails);
-                            }}
+                             onValueChange={(value) => handleFeeDetailChange(index, 'village', value)}
+                            disabled={fee.id !== 'bus'}
                         >
                             <SelectTrigger className="w-[150px]">
                                 <SelectValue placeholder="Select Village" />
@@ -512,7 +541,3 @@ export default function FeesCollectionClient({
     </div>
   );
 }
-
-    
-
-    

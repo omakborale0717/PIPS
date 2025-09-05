@@ -1,5 +1,5 @@
 
-import { getStudentsAction, getBusFeePaymentsAction } from '@/app/actions';
+import { getStudentsAction, getBusFeePaymentsAction, getSchoolFeesAction, getVillageFeesAction } from '@/app/actions';
 import FeesCollectionClient from '@/components/bus-watch/fees-collection-client';
 import {
   Card,
@@ -13,12 +13,11 @@ import { IndianRupee } from 'lucide-react';
 export default async function FeesCollectionPage() {
   const students = await getStudentsAction();
   const payments = await getBusFeePaymentsAction();
+  const schoolFees = await getSchoolFeesAction();
+  const villageFees = await getVillageFeesAction();
 
-  // This is a placeholder for more detailed fee structures
-  // In a real app, this would come from the database per student
-  const feeCategories = [
-    { id: 'school', name: 'School Fees', totalAmount: 20000 },
-    { id: 'bus', name: 'Bus Fees', totalAmount: 5000 },
+  // This is a placeholder for non-dynamic fee types
+  const otherFeeCategories = [
     { id: 'fine', name: 'Fine', totalAmount: 500 },
     { id: 'remark', name: 'Remark', totalAmount: 300 },
   ];
@@ -40,7 +39,9 @@ export default async function FeesCollectionPage() {
             <FeesCollectionClient
               students={students}
               payments={payments}
-              feeCategories={feeCategories}
+              schoolFees={schoolFees}
+              villageFees={villageFees}
+              otherFeeCategories={otherFeeCategories}
             />
           </CardContent>
         </Card>
@@ -48,6 +49,3 @@ export default async function FeesCollectionPage() {
     </main>
   );
 }
-
-
-    
