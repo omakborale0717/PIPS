@@ -17,9 +17,10 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { format, parseISO } from 'date-fns';
 import { getBusRoutesAction } from '@/app/actions';
+import type { BusRoute } from '@/lib/types';
 
 export default async function DieselManagementPage() {
-  const busRoutes = await getBusRoutesAction();
+  const busRoutes: BusRoute[] = await getBusRoutesAction();
 
   return (
     <main className="flex-1 p-4 md:p-6 lg:p-8">
@@ -41,15 +42,15 @@ export default async function DieselManagementPage() {
               {busRoutes.map((route) => (
                 <TableRow key={route.id}>
                   <TableCell className="font-medium">{route.busNumber}</TableCell>
-                  <TableCell>{route.name}</TableCell>
+                  <TableCell>{route.driverName}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Progress value={route.fuelLevel} className="w-32" />
-                      <span>{route.fuelLevel}%</span>
+                      <Progress value={route.fuelLevel || 0} className="w-32" />
+                      <span>{route.fuelLevel || 0}%</span>
                     </div>
                   </TableCell>
                   <TableCell>
-                     {format(parseISO(route.lastFueled), 'PPP')}
+                     {route.lastFueled ? format(parseISO(route.lastFueled), 'PPP') : 'N/A'}
                   </TableCell>
                 </TableRow>
               ))}

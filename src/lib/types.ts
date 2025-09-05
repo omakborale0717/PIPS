@@ -43,6 +43,9 @@ export type BusRoute = {
     route: string;
     busNumber: string;
     contact: string;
+    fuelLevel?: number;
+    lastFueled?: string;
+    serviceHistory?: Record<string, ServiceHistory>;
 }
 
 export type Student = {
