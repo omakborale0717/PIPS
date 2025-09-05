@@ -52,6 +52,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import type { Student, SchoolFee, VillageFee, BusFeePayment } from '@/lib/types';
 import { addBusFeePayment } from '@/app/actions';
+import { Label } from '@/components/ui/label';
 
 const searchSchema = z.object({
   studentId: z.string().min(1, 'Student selection is required.'),
