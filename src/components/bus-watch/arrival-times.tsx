@@ -30,6 +30,7 @@ const getStatusColor = (status: Arrival['status']) => {
 };
 
 const ArrivalTimeDisplay = ({ arrival }: { arrival: Arrival }) => {
+  if (!arrival.time) return null;
   const [timeParts, period] = arrival.time.split(' ');
   const [hours, minutes] = timeParts.split(':').map(Number);
 
@@ -51,7 +52,7 @@ export default function ArrivalTimes({ arrivals }: ArrivalTimesProps) {
   const filteredArrivals = useMemo(() => {
     if (!selectedDate) return arrivals;
     return arrivals.filter((arrival) =>
-      isSameDay(parseISO(arrival.date), selectedDate)
+      arrival.date && isSameDay(parseISO(arrival.date), selectedDate)
     );
   }, [arrivals, selectedDate]);
 
