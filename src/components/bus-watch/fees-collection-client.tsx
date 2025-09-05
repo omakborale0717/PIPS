@@ -15,10 +15,9 @@ import {
   RotateCcw,
   User,
   Info,
-  BadgePercent,
   Bus,
-  StickyNote,
   Receipt,
+  StickyNote,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -50,7 +49,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import type { Student, SchoolFee, VillageFee, BusFeePayment } from '@/lib/types';
+import type { Student, SchoolFee, VillageFee, BusFeePayment, FeeCategory } from '@/lib/types';
 import { addBusFeePayment } from '@/app/actions';
 import { Label } from '@/components/ui/label';
 
@@ -58,12 +57,6 @@ const searchSchema = z.object({
   studentId: z.string().min(1, 'Student selection is required.'),
   academicYear: z.string(),
 });
-
-export type FeeCategory = {
-  id: string;
-  name: string;
-  totalAmount: number;
-};
 
 type FeeDetails = {
   id: string;
@@ -210,12 +203,10 @@ export default function FeesCollectionClient({
       .reduce((acc, fee) => acc + fee.dueAmount, 0);
   }, [studentFeeDetails, selectedFeeIds]);
 
-  const totalSchoolFees = useMemo(() => {
-    return studentFeeDetails.find(fee => fee.id === 'school')?.totalAmount || 0;
-  }, [studentFeeDetails]);
-
-  const totalBusFees = useMemo(() => {
-    return studentFeeDetails.find(fee => fee.id === 'bus')?.totalAmount || 0;
+  const totalFees = useMemo(() => {
+    const schoolFee = studentFeeDetails.find(fee => fee.id === 'school')?.totalAmount || 0;
+    const busFee = studentFeeDetails.find(fee => fee.id === 'bus')?.totalAmount || 0;
+    return schoolFee + busFee;
   }, [studentFeeDetails]);
 
 
@@ -286,7 +277,6 @@ export default function FeesCollectionClient({
     switch (categoryName.toLowerCase()) {
       case 'school fees': return <Info className="h-4 w-4 text-blue-500" />;
       case 'bus fees': return <Bus className="h-4 w-4 text-green-500" />;
-      case 'fine': return <BadgePercent className="h-4 w-4 text-red-500" />;
       default: return <IndianRupee className="h-4 w-4 text-muted-foreground" />;
     }
   }
@@ -556,14 +546,10 @@ export default function FeesCollectionClient({
                     />
                   </div>
                 </div>
-                 <div className="md:col-span-2 grid grid-cols-2 gap-4">
+                 <div className="md:col-span-2 grid grid-cols-1 gap-4">
                      <div>
-                        <Label>Total School Fees</Label>
-                        <p className="text-2xl font-bold mt-2">₹{totalSchoolFees.toLocaleString()}</p>
-                    </div>
-                     <div>
-                        <Label>Total Bus Fees</Label>
-                        <p className="text-2xl font-bold mt-2">₹{totalBusFees.toLocaleString()}</p>
+                        <Label>Total Fees</Label>
+                        <p className="text-2xl font-bold mt-2">₹{totalFees.toLocaleString()}</p>
                     </div>
                  </div>
               </div>
