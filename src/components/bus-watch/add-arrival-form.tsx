@@ -5,7 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,16 +26,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { toast } from "@/hooks/use-toast";
 import type { Arrival } from "@/lib/types";
 import { addArrival } from "@/app/actions";
+import { cn } from "@/lib/utils";
 
 
 const formSchema = z.object({
   route: z.string().min(1, "Route is required."),
   destination: z.string().min(1, "Destination is required."),
-  time: z.string().min(1, "Time is required, e.g., '5 min'."),
+  time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)."),
   status: z.enum(["On Time", "Delayed", "Early"]),
+  date: z.date({ required_error: "An arrival date is required." }),
 });
 
 type AddArrivalFormProps = {
@@ -50,6 +59,7 @@ export default function AddArrivalForm({ onArrivalAdded }: AddArrivalFormProps) 
       destination: "",
       time: "",
       status: "On Time",
+      date: new Date(),
     },
   });
 
@@ -77,6 +87,44 @@ export default function AddArrivalForm({ onArrivalAdded }: AddArrivalFormProps) 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="route"
@@ -110,9 +158,9 @@ export default function AddArrivalForm({ onArrivalAdded }: AddArrivalFormProps) 
             <FormItem>
               <FormLabel>Arrival Time</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 5 min" {...field} />
+                <Input type="time" {...field} />
               </FormControl>
-              <FormDescription>Enter the estimated time until arrival.</FormDescription>
+              <FormDescription>Enter the scheduled arrival time.</FormDescription>
               <FormMessage />
             </FormItem>
           )}

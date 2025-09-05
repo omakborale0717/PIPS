@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { Arrival } from '@/lib/types';
-import { PlusCircle, MoreVertical, Loader2, Trash } from 'lucide-react';
+import { PlusCircle, MoreVertical, Loader2, Trash, Calendar as CalendarIcon } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +43,7 @@ import EditArrivalForm from '@/components/bus-watch/edit-arrival-form';
 import { deleteArrival } from '@/app/actions';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
 
 type ArrivalTimesClientProps = {
   initialArrivals: Arrival[];
@@ -143,6 +144,7 @@ export default function ArrivalTimesClient({ initialArrivals }: ArrivalTimesClie
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Date</TableHead>
             <TableHead>Route</TableHead>
             <TableHead>Destination</TableHead>
             <TableHead>Time</TableHead>
@@ -155,9 +157,10 @@ export default function ArrivalTimesClient({ initialArrivals }: ArrivalTimesClie
         <TableBody>
           {arrivals.map((arrival) => (
             <TableRow key={arrival.id}>
+              <TableCell>{format(parseISO(arrival.date), 'PPP')}</TableCell>
               <TableCell className="font-medium">{arrival.route}</TableCell>
               <TableCell>{arrival.destination}</TableCell>
-                <TableCell>{arrival.time}</TableCell>
+              <TableCell>{arrival.time}</TableCell>
               <TableCell>
                 <Badge
                   variant="default"
@@ -191,7 +194,7 @@ export default function ArrivalTimesClient({ initialArrivals }: ArrivalTimesClie
           ))}
             {arrivals.length === 0 && (
               <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                       No arrival times found.
                   </TableCell>
               </TableRow>

@@ -25,6 +25,7 @@ export type Arrival = {
   destination: string;
   time: string;
   status: 'On Time' | 'Delayed' | 'Early';
+  date: string; // ISO date string
 };
 
 export type ServiceHistory = {

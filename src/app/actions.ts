@@ -220,17 +220,21 @@ export async function addDieselEntry(entry: Omit<DieselEntry, 'id' | 'date'> & {
     }
 }
 
-export async function addArrival(arrival: Omit<Arrival, 'id'>) {
+export async function addArrival(arrival: Omit<Arrival, 'id' | 'date'> & { date: Date }) {
     try {
+        const newArrivalData = {
+            ...arrival,
+            date: arrival.date.toISOString(),
+        };
         const arrivalsRef = ref(db, 'arrivals');
         const newArrivalRef = push(arrivalsRef);
-        await set(newArrivalRef, arrival);
+        await set(newArrivalRef, newArrivalData);
 
         revalidatePath('/dashboard/settings');
         revalidatePath('/dashboard');
         revalidatePath('/dashboard/arrival-times');
 
-        return { success: true, data: { id: newArrivalRef.key!, ...arrival } };
+        return { success: true, data: { id: newArrivalRef.key!, ...newArrivalData } };
     } catch (error)
         {
         console.error(error);
