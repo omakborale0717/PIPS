@@ -76,7 +76,7 @@ export default async function SettingsPage() {
             villageFees={villageFees}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
