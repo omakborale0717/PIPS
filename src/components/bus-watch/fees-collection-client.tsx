@@ -49,7 +49,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import type { Student, SchoolFee, VillageFee, BusFeePayment } from '@/lib/types';
+import type { Student, SchoolFee, VillageFee, BusFeePayment, FeeCategory } from '@/lib/types';
 import { addBusFeePayment } from '@/app/actions';
 import { Label } from '@/components/ui/label';
 
@@ -68,14 +68,6 @@ type FeeDetails = {
   class?: string;
   village?: string;
 };
-
-// A fee category can be 'school', 'bus', or 'fine'
-// Redefining a simple version here as the main one from types.ts was removed.
-type FeeCategory = {
-    id: string;
-    name: string;
-    totalAmount: number;
-}
 
 
 type FeesCollectionClientProps = {
@@ -156,8 +148,8 @@ export default function FeesCollectionClient({
         const busPaidAmount = studentPayments.reduce((acc, p) => acc + p.amountPaid, 0);
 
         const feeCategories: FeeCategory[] = [
-            { id: 'school', name: 'School Fees', totalAmount: schoolFeeAmount },
-            { id: 'bus', name: 'Bus Fees', totalAmount: busFeeAmount },
+            { id: 'school', name: 'School Fees', defaultAmount: schoolFeeAmount },
+            { id: 'bus', name: 'Bus Fees', defaultAmount: busFeeAmount },
             ...otherFeeCategories,
         ];
         
@@ -166,14 +158,14 @@ export default function FeesCollectionClient({
           if (cat.id === 'bus') {
             paidAmount = busPaidAmount;
           }
-          // Placeholder for school fees paid
-          if (cat.id === 'school') paidAmount = 0; 
+          // Placeholder for other fees paid
+          if (cat.id !== 'bus') paidAmount = 0; 
 
-          const balance = cat.totalAmount - paidAmount;
+          const balance = cat.defaultAmount - paidAmount;
           return {
             id: cat.id,
             name: cat.name,
-            totalAmount: cat.totalAmount,
+            totalAmount: cat.defaultAmount,
             paidAmount,
             dueAmount: balance > 0 ? balance : 0,
             balance: balance,

@@ -6,8 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { getGeneralSettingsAction, getBusFeesSettingsAction, getProfileSettingsAction, getVillageFeesAction, getSchoolFeesAction } from '@/app/actions';
-import { KeyRound, Building, Bus, Palette, Bell, BadgePercent, IndianRupee, Phone, MapPin, BookUser } from 'lucide-react';
+import { getGeneralSettingsAction, getBusFeesSettingsAction, getProfileSettingsAction, getVillageFeesAction, getSchoolFeesAction, getFeeCategoriesAction } from '@/app/actions';
+import { KeyRound, Building, Bus, Palette, Bell, BadgePercent, IndianRupee, Phone, MapPin, BookUser, FileBox } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -20,6 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import SchoolFeesClient from '@/components/bus-watch/school-fees-client';
+import FeeCategoriesClient from '@/components/bus-watch/fee-categories-client';
 
 
 export default async function SettingsPage() {
@@ -29,6 +30,7 @@ export default async function SettingsPage() {
   const profileSettings = await getProfileSettingsAction();
   const villageFees = await getVillageFeesAction();
   const schoolFees = await getSchoolFeesAction();
+  const feeCategories = await getFeeCategoriesAction();
 
 
   return (
@@ -67,7 +69,8 @@ export default async function SettingsPage() {
         </Card>
 
         <SchoolFeesClient initialFees={schoolFees} />
-
+        
+        <FeeCategoriesClient initialCategories={feeCategories} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <Card>

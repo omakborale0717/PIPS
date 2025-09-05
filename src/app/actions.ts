@@ -2,7 +2,7 @@
 'use server';
 import { analyzeBusDisruptions } from '@/ai/flows/analyze-bus-disruptions';
 import { hashPassword } from '@/lib/crypto';
-import type { Student, BusRoute, DieselEntry, DailyLog, Arrival, ServiceHistory, GeneralSettings, BusFeesSettings, ProfileSettings, BusFeePayment, VillageFee, SchoolFee } from '@/lib/types';
+import type { Student, BusRoute, DieselEntry, DailyLog, Arrival, ServiceHistory, GeneralSettings, BusFeesSettings, ProfileSettings, BusFeePayment, VillageFee, SchoolFee, FeeCategory } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/firebase';
 import { ref, get, set, push, remove, update } from 'firebase/database';
@@ -85,6 +85,12 @@ export async function getSchoolFeesAction(): Promise<SchoolFee[]> {
     const feesRef = ref(db, 'schoolFees');
     const snapshot = await get(feesRef);
     return snapshotToData<SchoolFee>(snapshot);
+}
+
+export async function getFeeCategoriesAction(): Promise<FeeCategory[]> {
+    const feesRef = ref(db, 'feeCategories');
+    const snapshot = await get(feesRef);
+    return snapshotToData<FeeCategory>(snapshot);
 }
 
 
@@ -515,6 +521,54 @@ export async function addSchoolFeeAction(fee: Omit<SchoolFee, 'id'>) {
             return { success: false, error: error.message };
         }
         return { success: false, error: 'Failed to add school fee.' };
+    }
+}
+
+export async function addFeeCategoryAction(category: Omit<FeeCategory, 'id'>) {
+    try {
+        const feeCategoriesRef = ref(db, 'feeCategories');
+        const newFeeCategoryRef = push(feeCategoriesRef);
+        await set(newFeeCategoryRef, category);
+        const newFeeCategoryId = newFeeCategoryRef.key;
+        revalidatePath('/dashboard/settings');
+        return { success: true, data: { id: newFeeCategoryId!, ...category } };
+    } catch (error) {
+        console.error('Error adding fee category:', error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to add fee category.' };
+    }
+}
+
+export async function updateFeeCategoryAction(category: FeeCategory) {
+    try {
+        const categoryRef = ref(db, `feeCategories/${category.id}`);
+        const { id, ...categoryData } = category;
+        await update(categoryRef, categoryData);
+        revalidatePath('/dashboard/settings');
+        return { success: true, data: category };
+    } catch (error) {
+        console.error('Error updating fee category:', error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to update fee category.' };
+    }
+}
+
+export async function deleteFeeCategoryAction(categoryId: string) {
+    try {
+        const categoryRef = ref(db, `feeCategories/${categoryId}`);
+        await remove(categoryRef);
+        revalidatePath('/dashboard/settings');
+        return { success: true, data: { id: categoryId } };
+    } catch (error) {
+        console.error('Error deleting fee category:', error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to delete fee category.' };
     }
 }
 

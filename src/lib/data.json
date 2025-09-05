@@ -1,3 +1,4 @@
+
 {
   "realTimeBusLocations": [
     {
@@ -511,5 +512,9 @@
       "address": "Aurad (B), Karnataka"
     }
   },
-  "schoolFees": []
+  "schoolFees": [],
+  "feeCategories": [
+    { "id": "fine", "name": "Fine", "defaultAmount": 500 },
+    { "id": "lab-fee", "name": "Lab Fee", "defaultAmount": 1000 }
+  ]
 }

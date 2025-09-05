@@ -1,5 +1,5 @@
 
-import { getStudentsAction, getBusFeePaymentsAction, getSchoolFeesAction, getVillageFeesAction } from '@/app/actions';
+import { getStudentsAction, getBusFeePaymentsAction, getSchoolFeesAction, getVillageFeesAction, getFeeCategoriesAction } from '@/app/actions';
 import FeesCollectionClient from '@/components/bus-watch/fees-collection-client';
 import {
   Card,
@@ -15,11 +15,7 @@ export default async function FeesCollectionPage() {
   const payments = await getBusFeePaymentsAction();
   const schoolFees = await getSchoolFeesAction();
   const villageFees = await getVillageFeesAction();
-
-  // This is a placeholder for non-dynamic fee types
-  const otherFeeCategories = [
-    { id: 'fine', name: 'Fine', totalAmount: 500 },
-  ];
+  const otherFeeCategories = await getFeeCategoriesAction();
 
   return (
     <main className="flex-1 p-4 md:p-6 lg:p-8">

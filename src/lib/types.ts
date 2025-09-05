@@ -105,6 +105,12 @@ export type SchoolFee = {
   total: number;
 }
 
+export type FeeCategory = {
+  id: string;
+  name: string;
+  defaultAmount: number;
+}
+
 export type RealTimeBusLocation = {
     busId: string;
     lat: number;
