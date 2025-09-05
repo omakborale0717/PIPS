@@ -210,6 +210,15 @@ export default function FeesCollectionClient({
       .reduce((acc, fee) => acc + fee.dueAmount, 0);
   }, [studentFeeDetails, selectedFeeIds]);
 
+  const totalSchoolFees = useMemo(() => {
+    return studentFeeDetails.find(fee => fee.id === 'school')?.totalAmount || 0;
+  }, [studentFeeDetails]);
+
+  const totalBusFees = useMemo(() => {
+    return studentFeeDetails.find(fee => fee.id === 'bus')?.totalAmount || 0;
+  }, [studentFeeDetails]);
+
+
   useEffect(() => {
     setAmountToPay(totalPayable);
   }, [totalPayable]);
@@ -278,7 +287,6 @@ export default function FeesCollectionClient({
       case 'school fees': return <Info className="h-4 w-4 text-blue-500" />;
       case 'bus fees': return <Bus className="h-4 w-4 text-green-500" />;
       case 'fine': return <BadgePercent className="h-4 w-4 text-red-500" />;
-      case 'remark': return <StickyNote className="h-4 w-4 text-yellow-500" />;
       default: return <IndianRupee className="h-4 w-4 text-muted-foreground" />;
     }
   }
@@ -534,8 +542,8 @@ export default function FeesCollectionClient({
               <CardTitle>Payment Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
-                <div className="lg:col-span-1">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                <div className="md:col-span-1">
                   <Label htmlFor="receipt-number">Receipt Number</Label>
                   <div className="relative mt-2">
                      <Receipt className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -548,38 +556,44 @@ export default function FeesCollectionClient({
                     />
                   </div>
                 </div>
-                 <div className="lg:col-span-1">
-                  <Label htmlFor="amount-to-pay">Amount Paid</Label>
-                  <div className="relative mt-2">
-                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="amount-to-pay"
-                      type="number"
-                      placeholder="Enter amount"
-                      value={amountToPay}
-                      onChange={(e) => setAmountToPay(Number(e.target.value))}
-                      className="pl-8"
-                    />
-                  </div>
-                </div>
-                <div className="lg:col-span-2 flex flex-col items-end justify-end">
-                   <div className="text-right">
-                        <p className="text-sm text-muted-foreground">Total Payable</p>
-                        <p className="text-3xl font-bold">
-                            ₹{totalPayable.toLocaleString()}
-                        </p>
+                 <div className="md:col-span-2 grid grid-cols-2 gap-4">
+                     <div>
+                        <Label>Total School Fees</Label>
+                        <p className="text-2xl font-bold mt-2">₹{totalSchoolFees.toLocaleString()}</p>
                     </div>
-                </div>
+                     <div>
+                        <Label>Total Bus Fees</Label>
+                        <p className="text-2xl font-bold mt-2">₹{totalBusFees.toLocaleString()}</p>
+                    </div>
+                 </div>
               </div>
-               <div className="flex flex-col md:flex-row gap-2 justify-end pt-6">
-                 <Button onClick={handlePaymentSubmit} disabled={totalPayable <= 0}>
-                    <Save className="mr-2 h-4 w-4" />
-                    Submit Payment
-                  </Button>
-                  <Button onClick={handleGenerateReceipt} variant="outline" disabled={totalPayable <= 0}>
-                    <Printer className="mr-2 h-4 w-4" />
-                    Generate Receipt
-                  </Button>
+                <Separator className="my-6" />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <Label htmlFor="amount-to-pay">Amount to Pay</Label>
+                        <div className="relative mt-2">
+                            <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                            id="amount-to-pay"
+                            type="number"
+                            placeholder="Enter amount"
+                            value={amountToPay}
+                            onChange={(e) => setAmountToPay(Number(e.target.value))}
+                            className="pl-8 text-lg font-semibold"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex flex-col md:flex-row gap-2 justify-end items-end">
+                        <Button onClick={handlePaymentSubmit} disabled={amountToPay <= 0}>
+                            <Save className="mr-2 h-4 w-4" />
+                            Submit Payment
+                        </Button>
+                        <Button onClick={handleGenerateReceipt} variant="outline" disabled={amountToPay <= 0}>
+                            <Printer className="mr-2 h-4 w-4" />
+                            Generate Receipt
+                        </Button>
+                    </div>
                 </div>
             </CardContent>
           </Card>
@@ -588,5 +602,3 @@ export default function FeesCollectionClient({
     </div>
   );
 }
-
-    
