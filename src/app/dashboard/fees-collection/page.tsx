@@ -19,7 +19,6 @@ export default async function FeesCollectionPage() {
   // This is a placeholder for non-dynamic fee types
   const otherFeeCategories = [
     { id: 'fine', name: 'Fine', totalAmount: 500 },
-    { id: 'remark', name: 'Remark', totalAmount: 300 },
   ];
 
   return (

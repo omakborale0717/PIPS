@@ -94,7 +94,6 @@ export default function FeesCollectionClient({
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [studentFeeDetails, setStudentFeeDetails] = useState<FeeDetails[]>([]);
   const [selectedFeeIds, setSelectedFeeIds] = useState<string[]>([]);
-  const [narration, setNarration] = useState('');
   const [selectedClass, setSelectedClass] = useState('all');
 
   const searchForm = useForm<z.infer<typeof searchSchema>>({
@@ -197,7 +196,6 @@ export default function FeesCollectionClient({
     setSelectedStudent(null);
     setStudentFeeDetails([]);
     setSelectedFeeIds([]);
-    setNarration('');
     setSelectedClass('all');
   };
 
@@ -220,7 +218,6 @@ export default function FeesCollectionClient({
       studentId: selectedStudent?.id,
       amountPaid: totalPayable,
       feesPaidFor: selectedFeeIds,
-      narration,
     });
     toast({
       title: 'Payment Submitted (Demo)',
@@ -501,17 +498,7 @@ export default function FeesCollectionClient({
           
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-             <div className="space-y-2">
-                <Label htmlFor="narration">Narration / Remarks</Label>
-                <Input 
-                    id="narration"
-                    placeholder="Enter any payment remarks..."
-                    value={narration}
-                    onChange={(e) => setNarration(e.target.value)}
-                />
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-2 justify-end pt-6">
+            <div className="flex flex-col md:flex-row gap-2 justify-end pt-6 md:col-span-2">
               <Button onClick={handlePaymentSubmit} disabled={totalPayable <= 0}>
                 <Save />
                 Submit Payment
