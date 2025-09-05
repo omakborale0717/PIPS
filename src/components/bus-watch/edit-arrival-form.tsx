@@ -60,7 +60,7 @@ export default function EditArrivalForm({ arrival, onArrivalUpdated }: EditArriv
       destination: arrival.destination,
       time: arrival.time,
       status: arrival.status,
-      date: parseISO(arrival.date),
+      date: arrival.date ? parseISO(arrival.date) : new Date(),
     },
   });
 
