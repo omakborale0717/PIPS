@@ -157,7 +157,7 @@ export default function ArrivalTimesClient({ initialArrivals }: ArrivalTimesClie
         <TableBody>
           {arrivals.map((arrival) => (
             <TableRow key={arrival.id}>
-              <TableCell>{format(parseISO(arrival.date), 'PPP')}</TableCell>
+              <TableCell>{arrival.date ? format(parseISO(arrival.date), 'PPP') : 'N/A'}</TableCell>
               <TableCell className="font-medium">{arrival.route}</TableCell>
               <TableCell>{arrival.destination}</TableCell>
               <TableCell>{arrival.time}</TableCell>
@@ -237,3 +237,4 @@ export default function ArrivalTimesClient({ initialArrivals }: ArrivalTimesClie
     </>
   );
 }
+
