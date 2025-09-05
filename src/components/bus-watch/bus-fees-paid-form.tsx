@@ -188,7 +188,7 @@ export default function BusFeesPaidForm({ students, busRoutes, feeSettings, vill
                         <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input type="number" placeholder="e.g., 1200" className="pl-8" {...field} />
                     </div>
-                    {feeSettings && !selectedStudentDetails?.villageFeeAmount && <p className="text-xs text-muted-foreground pt-1">Default fee is ₹{feeSettings.monthlyFee.toLocaleString()}</p>}
+                    {feeSettings && !selectedStudentDetails?.villageFeeAmount && feeSettings.monthlyFee && <p className="text-xs text-muted-foreground pt-1">Default fee is ₹{feeSettings.monthlyFee.toLocaleString()}</p>}
                     <FormMessage />
                     </FormItem>
                 )}
