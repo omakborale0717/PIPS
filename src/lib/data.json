@@ -278,174 +278,383 @@
   "students": [
     {
       "id": "student-1",
-      "name": "Alice",
-      "usesBus": true,
-      "fatherName": "John Doe",
-      "parentContact": "555-1234",
-      "address": "123 Main St, Anytown, USA",
-      "busNumber": "B-101",
-      "lat": 37.773,
-      "lon": -122.425
+      "name": "Abhinandan",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Devidas",
+      "village": "Ekamba",
+      "parentContact": "9019866610",
+      "usesBus": true
     },
     {
       "id": "student-2",
-      "name": "Bob",
-      "usesBus": false,
-      "fatherName": "Jane Smith",
-      "parentContact": "555-5678",
-      "address": "456 Oak Ave, Anytown, USA",
-      "lat": 37.778,
-      "lon": -122.415
+      "name": "Amol",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Gotum",
+      "village": "Aurad",
+      "parentContact": "9902661132",
+      "usesBus": true
     },
     {
       "id": "student-3",
-      "name": "Charlie",
-      "usesBus": true,
-      "fatherName": "Peter Jones",
-      "parentContact": "555-8765",
-      "address": "789 Pine Ln, Anytown, USA",
-      "busNumber": "B-102",
-      "lat": 37.788,
-      "lon": -122.435
+      "name": "Aradhya",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Maroti",
+      "village": "Aurad",
+      "parentContact": "9164656212",
+      "usesBus": true
     },
     {
       "id": "student-4",
-      "name": "David",
-      "usesBus": true,
-      "fatherName": "Mary Brown",
-      "parentContact": "555-4321",
-      "address": "321 Maple Dr, Anytown, USA",
-      "busNumber": "B-101",
-      "lat": 37.769,
-      "lon": -122.428
+      "name": "Aradhya",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Dharmendra",
+      "village": "Aurad",
+      "parentContact": "8892931435",
+      "usesBus": true
     },
     {
       "id": "student-5",
-      "name": "Eve",
-      "usesBus": false,
-      "fatherName": "David Williams",
-      "parentContact": "555-9876",
-      "address": "654 Elm St, Anytown, USA",
-      "lat": 37.792,
-      "lon": -122.441
+      "name": "Arohi",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Krishna",
+      "village": "Aurad",
+      "parentContact": "6860817927",
+      "usesBus": true
     },
     {
       "id": "student-6",
-      "name": "Frank",
-      "usesBus": true,
-      "fatherName": "Susan Garcia",
-      "parentContact": "555-3456",
-      "address": "987 Birch Rd, Anytown, USA",
-      "busNumber": "B-103",
-      "lat": 37.781,
-      "lon": -122.45
+      "name": "Arsalan",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Irfan",
+      "village": "Aurad",
+      "parentContact": "9570003786",
+      "usesBus": true
     },
     {
       "id": "student-7",
-      "name": "Grace",
-      "usesBus": true,
-      "fatherName": "Robert Miller",
-      "parentContact": "555-6543",
-      "address": "159 Cedar Blvd, Anytown, USA",
-      "busNumber": "B-102",
-      "lat": 37.786,
-      "lon": -122.43
+      "name": "Arshad",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Saleem",
+      "village": "Aurad",
+      "parentContact": "9880478966",
+      "usesBus": true
     },
     {
       "id": "student-8",
-      "name": "Heidi",
-      "usesBus": false,
-      "fatherName": "Patricia Davis",
-      "parentContact": "555-7890",
-      "address": "753 Spruce Way, Anytown, USA",
-      "lat": 37.771,
-      "lon": -122.46
+      "name": "Arya",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Sudhir",
+      "village": "Bemra(k)",
+      "parentContact": "8421883501",
+      "usesBus": true
     },
     {
       "id": "student-9",
-      "name": "Ivan",
-      "usesBus": true,
-      "fatherName": "Michael Rodriguez",
-      "parentContact": "555-1122",
-      "address": "852 Fir Ct, Anytown, USA",
-      "busNumber": "B-104",
-      "lat": 37.776,
-      "lon": -122.465
+      "name": "Ashika",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Amrute",
+      "village": "Ekalar",
+      "parentContact": "8147086400",
+      "usesBus": true
     },
     {
       "id": "student-10",
-      "name": "Judy",
-      "usesBus": true,
-      "fatherName": "Linda Martinez",
-      "parentContact": "555-3344",
-      "address": "951 Redwood Pkwy, Anytown, USA",
-      "busNumber": "B-101",
-      "lat": 37.77,
-      "lon": -122.422
+      "name": "Hmdan",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Rizwan",
+      "village": "Aurad",
+      "parentContact": "7760924277",
+      "usesBus": true
     },
     {
       "id": "student-11",
-      "name": "Mallory",
-      "usesBus": true,
-      "fatherName": "James Hernandez",
-      "parentContact": "555-5566",
-      "address": "357 Aspen Grove, Anytown, USA",
-      "busNumber": "B-105",
-      "lat": 37.78,
-      "lon": -122.41
+      "name": "Kiran",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Rajkumar",
+      "village": "Toran",
+      "parentContact": "9030207079",
+      "usesBus": true
     },
     {
       "id": "student-12",
-      "name": "Niaj",
-      "usesBus": false,
-      "fatherName": "Barbara Lopez",
-      "parentContact": "555-7788",
-      "address": "246 Willow Creek, Anytown, USA",
-      "lat": 37.785,
-      "lon": -122.418
+      "name": "Laxmi",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Balaji",
+      "village": "Hokarana",
+      "parentContact": "8197929709",
+      "usesBus": true
     },
     {
       "id": "student-13",
-      "name": "Olivia",
-      "usesBus": true,
-      "fatherName": "William Gonzalez",
-      "parentContact": "555-9900",
-      "address": "135 Poplar Pl, Anytown, USA",
-      "busNumber": "B-102",
-      "lat": 37.789,
-      "lon": -122.433
+      "name": "Mahadev",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Nagraj",
+      "village": "Aurad",
+      "parentContact": "9970892672",
+      "usesBus": true
     },
     {
       "id": "student-14",
-      "name": "Peggy",
-      "usesBus": true,
-      "fatherName": "Richard Wilson",
-      "parentContact": "555-2468",
-      "address": "791 Sequoia Trail, Anytown, USA",
-      "busNumber": "B-103",
-      "lat": 37.779,
-      "lon": -122.452
+      "name": "Pranika",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Dattatri",
+      "village": "Boral",
+      "parentContact": "8971649767",
+      "usesBus": true
     },
     {
       "id": "student-15",
-      "name": "Sybil",
-      "usesBus": false,
-      "fatherName": "Joseph Anderson",
-      "parentContact": "555-1357",
-      "address": "975 Cypress Point, Anytown, USA",
-      "lat": 37.795,
-      "lon": -122.438
+      "name": "Ronak",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Sujeet",
+      "village": "Aurad",
+      "parentContact": "9632794777",
+      "usesBus": true
     },
     {
-      "id": "student-1756395279427",
-      "name": "Test Student",
-      "fatherName": "Test Father",
-      "parentContact": "1234567890",
-      "address": "Test Address",
-      "usesBus": true,
-      "busNumber": "B-101",
-      "lat": 37.7749,
-      "lon": -122.4194
+      "id": "student-16",
+      "name": "Rudraksha",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Balaji",
+      "village": "Mudhol (B)",
+      "parentContact": "9611795924",
+      "usesBus": true
+    },
+    {
+      "id": "student-17",
+      "name": "Sahi",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Gangadhar",
+      "village": "Handikher",
+      "parentContact": "9730394714",
+      "usesBus": true
+    },
+    {
+      "id": "student-18",
+      "name": "Sainath",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Achut",
+      "village": "Aurad",
+      "parentContact": "9449336967",
+      "usesBus": true
+    },
+    {
+      "id": "student-19",
+      "name": "Sainath",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Sadhashiv",
+      "village": "B Dabka",
+      "parentContact": "9353606759",
+      "usesBus": true
+    },
+    {
+      "id": "student-20",
+      "name": "Samrth",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Arvind",
+      "village": "B Dabka",
+      "parentContact": "9902319080",
+      "usesBus": true
+    },
+    {
+      "id": "student-21",
+      "name": "Sanjeevini",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Ram",
+      "village": "Aurad",
+      "parentContact": "8073968747",
+      "usesBus": true
+    },
+    {
+      "id": "student-22",
+      "name": "Shivshambhu",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Satish",
+      "village": "Belkuni(B)",
+      "parentContact": "9741167467",
+      "usesBus": true
+    },
+    {
+      "id": "student-23",
+      "name": "Shradha",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Udhav",
+      "village": "Aurad",
+      "parentContact": "9113863981",
+      "usesBus": true
+    },
+    {
+      "id": "student-24",
+      "name": "Shreyash",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Ravi",
+      "village": "kushnoor",
+      "parentContact": "7204560500",
+      "usesBus": true
+    },
+    {
+      "id": "student-25",
+      "name": "Shreyash",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Praveen",
+      "village": "Aurad",
+      "parentContact": "8073508186",
+      "usesBus": true
+    },
+    {
+      "id": "student-26",
+      "name": "Shripad(Dhondiram s",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Dhondiram",
+      "village": "Shivpur",
+      "parentContact": "9611306130",
+      "usesBus": true
+    },
+    {
+      "id": "student-27",
+      "name": "Shruti",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Shivgonda",
+      "village": "Aurad",
+      "parentContact": "9980785456",
+      "usesBus": true
+    },
+    {
+      "id": "student-28",
+      "name": "Shubham",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Jagdish",
+      "village": "Savargaon",
+      "parentContact": "7498762028",
+      "usesBus": true
+    },
+    {
+      "id": "student-29",
+      "name": "Soham",
+      "class": "1",
+      "section": "A",
+      "fatherName": "sunil",
+      "village": "Bardapur",
+      "parentContact": "9611914348",
+      "usesBus": true
+    },
+    {
+      "id": "student-30",
+      "name": "Srasti",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Shrihari",
+      "village": "Aurad",
+      "parentContact": "9482122909",
+      "usesBus": true
+    },
+    {
+      "id": "student-31",
+      "name": "Stephen",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Sushilkumar",
+      "village": "Aurad",
+      "parentContact": "8553226004",
+      "usesBus": true
+    },
+    {
+      "id": "student-32",
+      "name": "Vaishnavi",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Somnath",
+      "village": "Aurad",
+      "parentContact": "8856984539",
+      "usesBus": true
+    },
+    {
+      "id": "student-33",
+      "name": "Vijay",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Raviraj",
+      "village": "Tapshal",
+      "parentContact": "9845523448",
+      "usesBus": true
+    },
+    {
+      "id": "student-34",
+      "name": "Vishava",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Bhimanna",
+      "village": "Medpalli",
+      "parentContact": "8660472641",
+      "usesBus": true
+    },
+    {
+      "id": "student-35",
+      "name": "Rahul",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Prakash",
+      "village": "Hanraga",
+      "parentContact": "9620853078",
+      "usesBus": true
+    },
+    {
+      "id": "student-36",
+      "name": "Shreya",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Arvind",
+      "village": "Aurad",
+      "parentContact": "9902319080",
+      "usesBus": true
+    },
+    {
+      "id": "student-37",
+      "name": "Siddharth",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Yuvraj",
+      "village": "Aurad",
+      "parentContact": "9902319080",
+      "usesBus": true
+    },
+    {
+      "id": "student-38",
+      "name": "Harshal",
+      "class": "1",
+      "section": "A",
+      "fatherName": "Atmaram",
+      "village": "Hangraga",
+      "parentContact": "9986378707",
+      "usesBus": true
     }
   ],
   "dieselEntries": [
@@ -514,7 +723,17 @@
   },
   "schoolFees": [],
   "feeCategories": [
-    { "id": "fine", "name": "Fine", "defaultAmount": 500 },
-    { "id": "lab-fee", "name": "Lab Fee", "defaultAmount": 1000 }
+    {
+      "id": "fine",
+      "name": "Fine",
+      "term1": 500,
+      "term2": 0
+    },
+    {
+      "id": "lab-fee",
+      "name": "Lab Fee",
+      "term1": 500,
+      "term2": 500
+    }
   ]
 }
