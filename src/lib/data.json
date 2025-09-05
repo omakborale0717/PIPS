@@ -655,6 +655,156 @@
       "village": "Hangraga",
       "parentContact": "9986378707",
       "usesBus": true
+    },
+    {
+      "id": "student-39",
+      "name": "Ananad",
+      "fatherName": "Subhash",
+      "class": "1",
+      "section": "A",
+      "village": "Sangam",
+      "parentContact": "9945244585",
+      "usesBus": true
+    },
+    {
+      "id": "student-40",
+      "name": "Sangmesh",
+      "fatherName": "Naghath",
+      "class": "1",
+      "section": "A",
+      "village": "Sangam",
+      "parentContact": "9980597394",
+      "usesBus": true
+    },
+    {
+      "id": "student-41",
+      "name": "Sayinath",
+      "fatherName": "Baburao",
+      "class": "1",
+      "section": "A",
+      "village": "Sangam",
+      "parentContact": "9663378370",
+      "usesBus": true
+    },
+    {
+      "id": "student-42",
+      "name": "Shambhavi",
+      "fatherName": "Santhosh",
+      "class": "1",
+      "section": "A",
+      "village": "Sangam",
+      "parentContact": "8217316719",
+      "usesBus": true
+    },
+    {
+      "id": "student-43",
+      "name": "Sharan",
+      "fatherName": "Vaijanath",
+      "class": "1",
+      "section": "A",
+      "village": "Sangam",
+      "parentContact": "9901509171",
+      "usesBus": true
+    },
+    {
+      "id": "student-44",
+      "name": "Tanmay",
+      "fatherName": "Tukaram",
+      "class": "1",
+      "section": "A",
+      "village": "Sangam",
+      "parentContact": "9008928682",
+      "usesBus": true
+    },
+    {
+      "id": "student-45",
+      "name": "Vedant",
+      "fatherName": "Vittal",
+      "class": "1",
+      "section": "A",
+      "village": "Sangam",
+      "parentContact": "9686866952",
+      "usesBus": true
+    },
+    {
+      "id": "student-46",
+      "name": "Vishwaradhya",
+      "fatherName": "Nandkumar",
+      "class": "1",
+      "section": "A",
+      "village": "Sangam",
+      "parentContact": "8310006240",
+      "usesBus": true
+    },
+    {
+      "id": "student-47",
+      "name": "Adarsh",
+      "fatherName": "Jagannath",
+      "class": "1",
+      "section": "A",
+      "village": "Shelgi",
+      "parentContact": "9845347209",
+      "usesBus": true
+    },
+    {
+      "id": "student-48",
+      "name": "Shivaraj",
+      "fatherName": "Prakash",
+      "class": "1",
+      "section": "A",
+      "village": "Shelgi",
+      "parentContact": "9980312521",
+      "usesBus": true
+    },
+    {
+      "id": "student-49",
+      "name": "Srushti",
+      "fatherName": "Prakash",
+      "class": "1",
+      "section": "A",
+      "village": "Shelgi",
+      "parentContact": "9980312521",
+      "usesBus": true
+    },
+    {
+      "id": "student-50",
+      "name": "Shravani",
+      "fatherName": "Baburao",
+      "class": "1",
+      "section": "A",
+      "village": "Sonala",
+      "parentContact": "9902661320",
+      "usesBus": true
+    },
+    {
+      "id": "student-51",
+      "name": "Ananya",
+      "fatherName": "Santosh",
+      "class": "1",
+      "section": "A",
+      "village": "Yedola",
+      "parentContact": "9845781987",
+      "usesBus": true
+    },
+    {
+      "id": "student-52",
+      "name": "Shravani",
+      "fatherName": "Sheshrao",
+      "class": "1",
+      "section": "A",
+      "village": "Nagoor",
+      "parentContact": "9632863925",
+      "usesBus": true
+    },
+    {
+      "id": "student-53",
+      "name": "Abhinav",
+      "fatherName": "Gajendra",
+      "class": "1",
+      "section": "A",
+      "village": "Chikali",
+      "parentContact": "9900624138",
+      "usesBus": true
     }
   ],
   "dieselEntries": [
