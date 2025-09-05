@@ -499,20 +499,6 @@ export default function FeesCollectionClient({
             </CardContent>
           </Card>
           
-          <Alert>
-              <IndianRupee className="h-4 w-4" />
-              <AlertTitle>Payment Summary</AlertTitle>
-              <AlertDescription className="grid grid-cols-2 gap-4 mt-2">
-                 <div className="flex flex-col">
-                    <span className="text-sm text-muted-foreground">Total Payable Amount</span>
-                    <span className="text-lg font-bold text-primary">₹{totalPayable.toLocaleString()}</span>
-                </div>
-                 <div className="flex flex-col">
-                    <span className="text-muted-foreground">Balance After Payment</span>
-                    <span className="text-lg font-bold">₹{(studentFeeDetails.reduce((acc, fee) => acc + fee.balance, 0) - totalPayable).toLocaleString()}</span>
-                </div>
-              </AlertDescription>
-          </Alert>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
              <div className="space-y-2">
