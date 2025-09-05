@@ -209,7 +209,7 @@ export async function addDieselEntry(entry: Omit<DieselEntry, 'id' | 'date'> & {
         const dieselEntriesRef = ref(db, 'dieselEntries');
         const newDieselEntryRef = push(dieselEntriesRef);
         await set(newDieselEntryRef, newEntryData);
-        revalidatePath('/dashboard/diesel-details');
+        revalidatePath('/dashboard/diesel');
         return { success: true, data: {id: newDieselEntryRef.key!, ...newEntryData } };
     } catch (error) {
         console.error(error);
@@ -219,6 +219,39 @@ export async function addDieselEntry(entry: Omit<DieselEntry, 'id' | 'date'> & {
         return { success: false, error: 'Failed to add diesel entry.' };
     }
 }
+
+export async function updateDieselEntry(entry: DieselEntry) {
+    try {
+        const entryRef = ref(db, `dieselEntries/${entry.id}`);
+        const { id, ...entryData } = entry;
+        await update(entryRef, entryData);
+
+        revalidatePath('/dashboard/diesel');
+        return { success: true, data: entry };
+    } catch (error) {
+        console.error(error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to update diesel entry.' };
+    }
+}
+
+export async function deleteDieselEntry(entryId: string) {
+    try {
+        const entryRef = ref(db, `dieselEntries/${entryId}`);
+        await remove(entryRef);
+        revalidatePath('/dashboard/diesel');
+        return { success: true, data: { id: entryId } };
+    } catch (error) {
+        console.error(error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to delete diesel entry.' };
+    }
+}
+
 
 export async function addArrival(arrival: Omit<Arrival, 'id' | 'date'> & { date: Date }) {
     try {
