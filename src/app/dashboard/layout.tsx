@@ -120,16 +120,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     </SidebarMenuButton>
                    </Link>
                 </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <Link href="/dashboard/diesel-details">
-                    <SidebarMenuButton asChild tooltip="Diesel Details">
-                      <span>
-                        <BookText />
-                        Diesel Details
-                      </span>
-                    </SidebarMenuButton>
-                  </Link>
-                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <Link href="/dashboard/daily-log">
                     <SidebarMenuButton asChild tooltip="Daily Log">
