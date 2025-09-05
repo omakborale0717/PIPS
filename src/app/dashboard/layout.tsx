@@ -11,7 +11,7 @@ import {
   SidebarContent,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Route, Bus, Settings, Bell, Fuel, PencilLine, UserPlus, Wrench, BookText, User, ClipboardList, ListOrdered, Bot, Contact, PlusCircle, Clock, FileSpreadsheet, ReceiptText, MapPinned, Users, IndianRupee } from 'lucide-react';
+import { LayoutDashboard, Route, Bus, Settings, Bell, Fuel, PencilLine, UserPlus, Wrench, BookText, User, ClipboardList, ListOrdered, Bot, Contact, PlusCircle, Clock, FileSpreadsheet, ReceiptText, MapPinned, Users, IndianRupee, FileText } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
@@ -166,6 +166,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                       <span>
                         <ReceiptText />
                         Bus Fees Paid
+                      </span>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <Link href="/dashboard/generated-receipts">
+                    <SidebarMenuButton asChild tooltip="Generated Receipts">
+                      <span>
+                        <FileText />
+                        Generated Receipts
                       </span>
                     </SidebarMenuButton>
                   </Link>

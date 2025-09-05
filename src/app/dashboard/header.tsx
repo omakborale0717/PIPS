@@ -26,6 +26,7 @@ const getTitleFromPath = (path: string) => {
   if (path.startsWith('/dashboard/disruption-analysis')) return 'AI Disruption Analysis';
   if (path.startsWith('/dashboard/excel-exporter')) return 'Excel Workbook';
   if (path.startsWith('/dashboard/alerts')) return 'Alerts';
+  if (path.startsWith('/dashboard/generated-receipts')) return 'Generated Receipts';
   return 'Bus Management';
 }
 
