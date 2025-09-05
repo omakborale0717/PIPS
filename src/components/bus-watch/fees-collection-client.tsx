@@ -18,6 +18,7 @@ import {
   BadgePercent,
   Bus,
   StickyNote,
+  Receipt,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -49,9 +50,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import type { Student, SchoolFee, VillageFee } from '@/lib/types';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Label } from '../ui/label';
+import type { Student, SchoolFee, VillageFee, BusFeePayment } from '@/lib/types';
+import { addBusFeePayment } from '@/app/actions';
 
 const searchSchema = z.object({
   studentId: z.string().min(1, 'Student selection is required.'),
@@ -77,7 +77,7 @@ type FeeDetails = {
 
 type FeesCollectionClientProps = {
   students: Student[];
-  payments: any[]; // Using any for payments for now
+  payments: BusFeePayment[];
   schoolFees: SchoolFee[];
   villageFees: VillageFee[];
   otherFeeCategories: FeeCategory[];
@@ -95,6 +95,8 @@ export default function FeesCollectionClient({
   const [studentFeeDetails, setStudentFeeDetails] = useState<FeeDetails[]>([]);
   const [selectedFeeIds, setSelectedFeeIds] = useState<string[]>([]);
   const [selectedClass, setSelectedClass] = useState('all');
+  const [receiptNumber, setReceiptNumber] = useState('');
+  const [amountToPay, setAmountToPay] = useState(0);
 
   const searchForm = useForm<z.infer<typeof searchSchema>>({
     resolver: zodResolver(searchSchema),
@@ -197,6 +199,8 @@ export default function FeesCollectionClient({
     setStudentFeeDetails([]);
     setSelectedFeeIds([]);
     setSelectedClass('all');
+    setReceiptNumber('');
+    setAmountToPay(0);
   };
 
   const totalPayable = useMemo(() => {
@@ -205,7 +209,12 @@ export default function FeesCollectionClient({
       .reduce((acc, fee) => acc + fee.dueAmount, 0);
   }, [studentFeeDetails, selectedFeeIds]);
 
-  const handlePaymentSubmit = () => {
+  useEffect(() => {
+    setAmountToPay(totalPayable);
+  }, [totalPayable]);
+
+
+  const handlePaymentSubmit = async () => {
     if (totalPayable <= 0) {
       toast({
         variant: 'destructive',
@@ -214,15 +223,38 @@ export default function FeesCollectionClient({
       });
       return;
     }
-    console.log({
-      studentId: selectedStudent?.id,
-      amountPaid: totalPayable,
-      feesPaidFor: selectedFeeIds,
-    });
-    toast({
-      title: 'Payment Submitted (Demo)',
-      description: `Payment of ₹${totalPayable.toLocaleString()} for ${selectedStudent?.name} has been recorded.`,
-    });
+    if (!selectedStudent) return;
+
+    // We'll just log bus fee payments for now, as that's what we have a model for.
+    const busFeeSelected = studentFeeDetails.find(fee => selectedFeeIds.includes(fee.id) && fee.id === 'bus');
+
+    if (busFeeSelected) {
+        const result = await addBusFeePayment({
+            studentId: selectedStudent.id,
+            amountPaid: amountToPay, // Using the state value from the input
+            paymentDate: new Date(),
+            notes: `Receipt No: ${receiptNumber}`
+        });
+        if (result.success) {
+             toast({
+                title: 'Payment Submitted',
+                description: `Payment of ₹${amountToPay.toLocaleString()} for ${selectedStudent?.name} has been recorded.`,
+            });
+            // Refetch or update data locally
+        } else {
+             toast({
+                variant: 'destructive',
+                title: 'Payment Failed',
+                description: result.error,
+            });
+        }
+    } else {
+         toast({
+            title: 'Payment Submitted (Demo)',
+            description: `Payment of ₹${amountToPay.toLocaleString()} for ${selectedStudent?.name} has been recorded. (Non-bus fees are not saved in this demo)`,
+        });
+    }
+
   };
 
   const handleGenerateReceipt = () => {
@@ -495,22 +527,65 @@ export default function FeesCollectionClient({
             </Table>
             </CardContent>
           </Card>
-          
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-            <div className="flex flex-col md:flex-row gap-2 justify-end pt-6 md:col-span-2">
-              <Button onClick={handlePaymentSubmit} disabled={totalPayable <= 0}>
-                <Save />
-                Submit Payment
-              </Button>
-              <Button onClick={handleGenerateReceipt} variant="outline" disabled={totalPayable <= 0}>
-                <Printer />
-                Generate Receipt
-              </Button>
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+                <div className="lg:col-span-1">
+                  <Label htmlFor="receipt-number">Receipt Number</Label>
+                  <div className="relative mt-2">
+                     <Receipt className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="receipt-number"
+                      placeholder="Enter receipt no."
+                      value={receiptNumber}
+                      onChange={(e) => setReceiptNumber(e.target.value)}
+                      className="pl-8"
+                    />
+                  </div>
+                </div>
+                 <div className="lg:col-span-1">
+                  <Label htmlFor="amount-to-pay">Amount Paid</Label>
+                  <div className="relative mt-2">
+                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="amount-to-pay"
+                      type="number"
+                      placeholder="Enter amount"
+                      value={amountToPay}
+                      onChange={(e) => setAmountToPay(Number(e.target.value))}
+                      className="pl-8"
+                    />
+                  </div>
+                </div>
+                <div className="lg:col-span-2 flex flex-col items-end justify-end">
+                   <div className="text-right">
+                        <p className="text-sm text-muted-foreground">Total Payable</p>
+                        <p className="text-3xl font-bold">
+                            ₹{totalPayable.toLocaleString()}
+                        </p>
+                    </div>
+                </div>
+              </div>
+               <div className="flex flex-col md:flex-row gap-2 justify-end pt-6">
+                 <Button onClick={handlePaymentSubmit} disabled={totalPayable <= 0}>
+                    <Save className="mr-2 h-4 w-4" />
+                    Submit Payment
+                  </Button>
+                  <Button onClick={handleGenerateReceipt} variant="outline" disabled={totalPayable <= 0}>
+                    <Printer className="mr-2 h-4 w-4" />
+                    Generate Receipt
+                  </Button>
+                </div>
+            </CardContent>
+          </Card>
         </>
       )}
     </div>
   );
 }
+
+    
