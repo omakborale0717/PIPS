@@ -9,10 +9,9 @@ import {
 } from '@/components/ui/card';
 import { notFound } from 'next/navigation';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Phone, User, Bus, School, IndianRupee, MapPin, Banknote, UserSquare } from 'lucide-react';
+import { Phone, User, Bus, School, IndianRupee, MapPin, Banknote, UserSquare, ArrowLeft, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 import type { Student } from '@/lib/types';
 import { getStudentsAction, getBusFeePaymentsAction } from '@/app/actions';
 import {
@@ -51,6 +50,14 @@ export default async function StudentDetailPage({ params }: { params: { id: stri
             </Link>
           </Button>
           <h1 className="text-2xl font-bold">Student Details</h1>
+          <div className="ml-auto flex gap-2">
+            <Button asChild variant="outline">
+                <Link href={`/dashboard/bus-management/${student.id}/edit`}>
+                    <Pencil className="mr-2 h-4 w-4" /> Edit
+                </Link>
+            </Button>
+            {/* We can add a client component for delete confirmation here later */}
+          </div>
         </div>
         <Card>
           <CardHeader className="flex flex-col md:flex-row items-start md:items-center gap-4">
@@ -141,7 +148,7 @@ export default async function StudentDetailPage({ params }: { params: { id: stri
                 <TableBody>
                   {studentPayments.map((payment) => (
                     <TableRow key={payment.id}>
-                      <TableCell>{format(parseISO(payment.paymentDate), 'PPP')}</TableCell>
+                      <TableCell>{payment.paymentDate ? format(parseISO(payment.paymentDate), 'PPP') : 'N/A'}</TableCell>
                       <TableCell className="font-medium">
                         {payment.amountPaid.toLocaleString()}
                       </TableCell>

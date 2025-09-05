@@ -19,6 +19,7 @@ const getTitleFromPath = (path: string) => {
   if (path.startsWith('/dashboard/daily-log-details')) return 'Daily Log Details';
   if (path.startsWith('/dashboard/daily-log')) return 'Daily Log';
   if (path.startsWith('/dashboard/settings')) return 'Settings';
+  if (path.startsWith('/dashboard/bus-management/[id]/edit')) return 'Edit Student';
   if (path.startsWith('/dashboard/bus-management/')) return 'Student Details';
   if (path.startsWith('/dashboard/bus-management')) return 'Student Details';
   if (path.startsWith('/dashboard/bus-repair')) return 'Bus Repair';

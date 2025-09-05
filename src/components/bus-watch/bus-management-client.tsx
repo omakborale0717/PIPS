@@ -29,14 +29,25 @@ import {
 import type { StudentWithPaidFees } from '@/app/dashboard/bus-management/page';
 import { Input } from '../ui/input';
 import { cn } from '@/lib/utils';
+import { Button } from '../ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { MoreVertical, Pencil, Trash, Loader2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
+import { deleteStudent } from '@/app/actions';
+import { toast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 type BusManagementClientProps = {
   students: StudentWithPaidFees[];
 };
 
-export default function BusManagementClient({ students }: BusManagementClientProps) {
+export default function BusManagementClient({ students: initialStudents }: BusManagementClientProps) {
+  const router = useRouter();
+  const [students, setStudents] = useState<StudentWithPaidFees[]>(initialStudents);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBus, setSelectedBus] = useState('all');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<StudentWithPaidFees | null>(null);
 
   const uniqueBuses = ['all', ...Array.from(new Set(students.filter(s => s.busNumber).map(s => s.busNumber!)))];
 
@@ -48,7 +59,35 @@ export default function BusManagementClient({ students }: BusManagementClientPro
     return busMatch && searchMatch;
   });
 
+  const handleDeleteClick = (student: StudentWithPaidFees) => {
+    setStudentToDelete(student);
+  };
+
+  const confirmDelete = async () => {
+    if (!studentToDelete) return;
+
+    setIsDeleting(true);
+    const result = await deleteStudent(studentToDelete.id);
+    setIsDeleting(false);
+
+    if (result.success) {
+      toast({
+        title: "Student Deleted",
+        description: `${studentToDelete.name} has been removed from the system.`,
+      });
+      setStudents(prev => prev.filter(s => s.id !== studentToDelete.id));
+      setStudentToDelete(null);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error Deleting Student",
+        description: result.error,
+      });
+    }
+  };
+
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle>Student Details</CardTitle>
@@ -94,6 +133,7 @@ export default function BusManagementClient({ students }: BusManagementClientPro
               <TableHead>Fees (₹)</TableHead>
               <TableHead>Total Paid (₹)</TableHead>
               <TableHead>Balance (₹)</TableHead>
+              <TableHead><span className="sr-only">Actions</span></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -114,11 +154,32 @@ export default function BusManagementClient({ students }: BusManagementClientPro
                  <TableCell className={cn("font-semibold", student.balance > 0 ? "text-destructive" : "text-muted-foreground")}>
                   {student.balance.toLocaleString()}
                 </TableCell>
+                <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/bus-management/${student.id}/edit`)}>
+                          <Pencil className="mr-2 h-4 w-4"/> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteClick(student)}
+                          className="text-destructive"
+                        >
+                          <Trash className="mr-2 h-4 w-4"/> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                </TableCell>
               </TableRow>
             ))}
              {filteredStudents.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   No students found matching your criteria.
                 </TableCell>
               </TableRow>
@@ -127,5 +188,25 @@ export default function BusManagementClient({ students }: BusManagementClientPro
         </Table>
       </CardContent>
     </Card>
+
+    <AlertDialog open={!!studentToDelete} onOpenChange={(open) => !open && setStudentToDelete(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the student record for <span className="font-semibold">{studentToDelete?.name}</span>.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setStudentToDelete(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash className="mr-2 h-4 w-4" />}
+                    Delete Student
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+
+    </>
   );
 }

@@ -133,6 +133,41 @@ export async function addStudent(student: Omit<Student, 'id'>) {
     }
 }
 
+export async function updateStudent(student: Student) {
+    try {
+        const studentRef = ref(db, `students/${student.id}`);
+        const { id, ...studentData } = student;
+        await update(studentRef, studentData);
+
+        revalidatePath(`/dashboard/bus-management/${id}`);
+        revalidatePath('/dashboard/bus-management');
+        return { success: true, data: student };
+    } catch (error) {
+        console.error('Error updating student:', error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to update student.' };
+    }
+}
+
+export async function deleteStudent(studentId: string) {
+    try {
+        const studentRef = ref(db, `students/${studentId}`);
+        await remove(studentRef);
+
+        revalidatePath('/dashboard/bus-management');
+        return { success: true, data: { id: studentId } };
+    } catch (error) {
+        console.error('Error deleting student:', error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to delete student.' };
+    }
+}
+
+
 export async function addBusRoute(route: Omit<BusRoute, 'id'>) {
     try {
         const busRoutesRef = ref(db, 'busRoutes');
