@@ -8,7 +8,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Users, Bus } from 'lucide-react';
-import { getStudentsAction, getBusFeePaymentsAction } from '@/app/actions';
+import { getStudentsAction, getBusFeePaymentsAction, getBusRoutesAction } from '@/app/actions';
 import BusManagementClient from '@/components/bus-watch/bus-management-client';
 import type { Student } from '@/lib/types';
 
@@ -18,8 +18,10 @@ export type StudentWithPaidFees = Student & { totalPaid: number; balance: number
 export default async function BusManagementPage() {
   const students = await getStudentsAction();
   const payments = await getBusFeePaymentsAction();
+  const busRoutes = await getBusRoutesAction();
 
   const totalStudents = students.length;
+  const activeBuses = busRoutes.length;
 
   const studentsWithPaidFees: StudentWithPaidFees[] = students.map(student => {
     const studentPayments = payments.filter(p => p.studentId === student.id);
@@ -53,7 +55,7 @@ export default async function BusManagementPage() {
             <Bus className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-             <div className="text-2xl font-bold">...</div>
+             <div className="text-2xl font-bold">{activeBuses}</div>
             <p className="text-xs text-muted-foreground">
               Click "Routes" to see bus details
             </p>

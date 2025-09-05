@@ -12,8 +12,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Phone, User, Bus, School, IndianRupee, MapPin, Banknote, UserSquare, ArrowLeft, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import type { Student } from '@/lib/types';
-import { getStudentsAction, getBusFeePaymentsAction } from '@/app/actions';
+import type { Student, BusFeePayment, BusRoute, VillageFee } from '@/lib/types';
+import { getStudentsAction, getBusFeePaymentsAction, getBusRoutesAction, getVillageFeesAction } from '@/app/actions';
 import {
   Table,
   TableBody,
@@ -27,17 +27,24 @@ import { Separator } from '@/components/ui/separator';
 
 export default async function StudentDetailPage({ params }: { params: { id: string } }) {
   const studentId = params.id;
-  const allStudents = await getStudentsAction();
-  const allPayments = await getBusFeePaymentsAction();
+  const allStudents: Student[] = await getStudentsAction();
+  const allPayments: BusFeePayment[] = await getBusFeePaymentsAction();
+  const allBusRoutes: BusRoute[] = await getBusRoutesAction();
+  const allVillageFees: VillageFee[] = await getVillageFeesAction();
   
   const student = allStudents.find((s) => s.id === studentId);
 
   if (!student) {
     notFound();
   }
+  
+  const studentBusRoute = allBusRoutes.find(r => r.busNumber === student.busNumber);
+  const studentVillageFee = allVillageFees.find(v => v.villageName === student.village);
 
   const studentPayments = allPayments.filter(p => p.studentId === studentId);
   const totalPaid = studentPayments.reduce((acc, p) => acc + p.amountPaid, 0);
+  const totalFees = student.usesBus ? (student.fees ?? studentVillageFee?.feeAmount ?? 0) : 0;
+  const balance = totalFees - totalPaid;
 
   return (
     <main className="flex-1 p-4 md:p-6 lg:p-8">
@@ -107,7 +114,7 @@ export default async function StudentDetailPage({ params }: { params: { id: stri
                 <IndianRupee className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Fees (₹)</p>
-                  <p className="font-medium">{student.fees?.toLocaleString() || 'N/A'}</p>
+                  <p className="font-medium">{totalFees.toLocaleString() || 'N/A'}</p>
                 </div>
               </div>
                <div className="flex items-center gap-3">
@@ -170,9 +177,19 @@ export default async function StudentDetailPage({ params }: { params: { id: stri
               {studentPayments.length > 0 && (
                 <>
                     <Separator className="my-4" />
-                    <div className="flex justify-end items-center font-bold text-lg pr-4">
-                        <span className="text-muted-foreground mr-2">Total Paid:</span>
-                        <span>₹{totalPaid.toLocaleString()}</span>
+                    <div className="flex justify-end items-center gap-6 font-bold text-lg pr-4">
+                        <div className="text-right">
+                          <span className="text-muted-foreground text-sm font-medium mr-2">Total Fees:</span>
+                          <span className="text-base">₹{totalFees.toLocaleString()}</span>
+                        </div>
+                         <div className="text-right">
+                          <span className="text-muted-foreground text-sm font-medium mr-2">Total Paid:</span>
+                          <span className="text-green-600 text-base">₹{totalPaid.toLocaleString()}</span>
+                        </div>
+                         <div className="text-right">
+                          <span className="text-muted-foreground text-sm font-medium mr-2">Balance:</span>
+                          <span className="text-destructive text-base">₹{balance.toLocaleString()}</span>
+                        </div>
                     </div>
                 </>
               )}
