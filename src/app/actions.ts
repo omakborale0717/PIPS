@@ -200,6 +200,39 @@ export async function addDailyLog(log: Omit<DailyLog, 'id' | 'date'> & { date: D
     }
 }
 
+export async function updateDailyLog(log: DailyLog) {
+    try {
+        const logRef = ref(db, `dailyLogs/${log.id}`);
+        const { id, ...logData } = log;
+        await update(logRef, logData);
+
+        revalidatePath('/dashboard/daily-log-details');
+        return { success: true, data: log };
+    } catch (error) {
+        console.error(error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to update daily log.' };
+    }
+}
+
+export async function deleteDailyLog(logId: string) {
+    try {
+        const logRef = ref(db, `dailyLogs/${logId}`);
+        await remove(logRef);
+        revalidatePath('/dashboard/daily-log-details');
+        return { success: true, data: { id: logId } };
+    } catch (error) {
+        console.error(error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to delete daily log.' };
+    }
+}
+
+
 export async function addDieselEntry(entry: Omit<DieselEntry, 'id' | 'date'> & { date: Date }) {
     try {
          const newEntryData = {
