@@ -177,7 +177,8 @@ export default function FeeCategoriesClient({ initialCategories, schoolFees, vil
                 <TableHead>Category Name</TableHead>
                 <TableHead>Class</TableHead>
                 <TableHead>Village</TableHead>
-                <TableHead className="text-right">Default Amount (₹)</TableHead>
+                <TableHead className="text-right">Term 1</TableHead>
+                <TableHead className="text-right">Term 2</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
@@ -188,7 +189,10 @@ export default function FeeCategoriesClient({ initialCategories, schoolFees, vil
                   <TableCell>{category.class ? <Badge variant="outline">{category.class}</Badge> : 'N/A'}</TableCell>
                   <TableCell>{category.village ? <Badge variant="outline">{category.village}</Badge> : 'N/A'}</TableCell>
                   <TableCell className="text-right">
-                    {category.defaultAmount.toLocaleString()}
+                    {category.term1.toLocaleString()}
+                  </TableCell>
+                   <TableCell className="text-right">
+                    {category.term2.toLocaleString()}
                   </TableCell>
                   <TableCell className="text-right">
                      <DropdownMenu>
@@ -215,7 +219,7 @@ export default function FeeCategoriesClient({ initialCategories, schoolFees, vil
               ))}
               {categories.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
                     No custom fee categories have been added yet.
                   </TableCell>
                 </TableRow>

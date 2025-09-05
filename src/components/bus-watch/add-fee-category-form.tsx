@@ -28,7 +28,8 @@ import {
 
 const formSchema = z.object({
   name: z.string().min(1, "Category name is required."),
-  defaultAmount: z.coerce.number().min(0, "Amount must be a positive number."),
+  term1: z.coerce.number().min(0, "Amount must be a positive number."),
+  term2: z.coerce.number().min(0, "Amount must be a positive number."),
   class: z.string().optional(),
   village: z.string().optional(),
 });
@@ -45,9 +46,10 @@ export default function AddFeeCategoryForm({ onAddCategory, schoolFees, villageF
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      defaultAmount: 0,
-      class: "",
-      village: "",
+      term1: 0,
+      term2: 0,
+      class: "all-classes",
+      village: "all-villages",
     },
   });
 
@@ -55,8 +57,8 @@ export default function AddFeeCategoryForm({ onAddCategory, schoolFees, villageF
     setIsLoading(true);
     const categoryData = {
         ...values,
-        class: values.class === 'all-classes' ? '' : values.class,
-        village: values.village === 'all-villages' ? '' : values.village,
+        class: values.class === 'all-classes' ? undefined : values.class,
+        village: values.village === 'all-villages' ? undefined : values.village,
     }
     await onAddCategory(categoryData);
     setIsLoading(false);
@@ -79,20 +81,36 @@ export default function AddFeeCategoryForm({ onAddCategory, schoolFees, villageF
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="defaultAmount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Default Amount (₹)</FormLabel>
-               <div className="relative">
-                <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input type="number" placeholder="e.g., 500" className="pl-8" {...field} />
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+            <FormField
+            control={form.control}
+            name="term1"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Term 1 (₹)</FormLabel>
+                <div className="relative">
+                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input type="number" placeholder="e.g., 500" className="pl-8" {...field} />
+                </div>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+             <FormField
+            control={form.control}
+            name="term2"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Term 2 (₹)</FormLabel>
+                <div className="relative">
+                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input type="number" placeholder="e.g., 500" className="pl-8" {...field} />
+                </div>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+        </div>
          <div className="grid grid-cols-2 gap-4">
              <FormField
               control={form.control}

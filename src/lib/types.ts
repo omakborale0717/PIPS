@@ -108,7 +108,8 @@ export type SchoolFee = {
 export type FeeCategory = {
   id: string;
   name: string;
-  defaultAmount: number;
+  term1: number;
+  term2: number;
   class?: string;
   village?: string;
 }
