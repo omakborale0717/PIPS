@@ -374,26 +374,55 @@ export async function deleteArrival(arrivalId: string) {
     }
 }
 
-export async function addServiceHistory(busId: string, serviceHistory: ServiceHistory) {
+export async function addServiceHistory(busId: string, serviceHistory: Omit<ServiceHistory, 'id'>) {
     try {
         const serviceHistoryRef = ref(db, `busRoutes/${busId}/serviceHistory`);
         const newServiceHistoryRef = push(serviceHistoryRef);
         await set(newServiceHistoryRef, serviceHistory);
 
-        // This action should probably return the new list of histories.
-        // For now, let's refetch it to return the updated list.
-        const updatedBusSnapshot = await get(ref(db, `busRoutes/${busId}`));
-        const updatedBusData = singleSnapshotToData<BusRoute>(updatedBusSnapshot);
-        const updatedHistory = updatedBusData?.serviceHistory ? Object.values(updatedBusData.serviceHistory) : [];
-
         revalidatePath('/dashboard/bus-repair');
-        return { success: true, data: updatedHistory };
+        return { success: true, data: { id: newServiceHistoryRef.key!, ...serviceHistory } };
 
     } catch (error) {
         console.error(error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
         return { success: false, error: 'Failed to add service history.' };
     }
 }
+
+export async function updateServiceHistory(busId: string, serviceHistory: ServiceHistory) {
+    try {
+        const serviceHistoryRef = ref(db, `busRoutes/${busId}/serviceHistory/${serviceHistory.id}`);
+        const { id, ...serviceData } = serviceHistory;
+        await update(serviceHistoryRef, serviceData);
+        revalidatePath('/dashboard/bus-repair');
+        return { success: true, data: serviceHistory };
+    } catch (error) {
+        console.error('Error updating service history:', error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to update service history.' };
+    }
+}
+
+export async function deleteServiceHistory(busId: string, serviceHistoryId: string) {
+    try {
+        const serviceHistoryRef = ref(db, `busRoutes/${busId}/serviceHistory/${serviceHistoryId}`);
+        await remove(serviceHistoryRef);
+        revalidatePath('/dashboard/bus-repair');
+        return { success: true, data: { id: serviceHistoryId } };
+    } catch (error) {
+        console.error('Error deleting service history:', error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'Failed to delete service history.' };
+    }
+}
+
 
 export async function addBusFeePayment(payment: Omit<BusFeePayment, 'id' | 'paymentDate'> & { paymentDate: Date }) {
     try {
@@ -523,5 +552,7 @@ export async function getAllDataAsJsonAction() {
         return { success: false, error: 'An unknown error occurred while exporting data.' };
     }
 }
+
+    
 
     

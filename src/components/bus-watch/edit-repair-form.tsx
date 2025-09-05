@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,13 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
@@ -35,7 +28,6 @@ import type { ServiceHistory, BusRoute } from "@/lib/types";
 import { useState } from "react";
 
 const formSchema = z.object({
-  busId: z.string().min(1, "Bus is required."),
   date: z.date({ required_error: "A service date is required." }),
   machineName: z.string().min(1, "Machine name is required."),
   contactNumber: z.string().min(1, "Contact number is required."),
@@ -44,105 +36,85 @@ const formSchema = z.object({
   remark: z.string().min(1, "Remark is required."),
 });
 
-type AddRepairFormProps = {
-  onAddRepair: (busId: string, data: Omit<ServiceHistory, 'id'|'date'> & { date: Date }) => void;
-  busRoutes: BusRoute[];
+type EditRepairFormProps = {
+  onUpdateRepair: (busId: string, data: ServiceHistory) => void;
+  bus: BusRoute;
+  history: ServiceHistory;
 };
 
-export default function AddRepairForm({ onAddRepair, busRoutes }: AddRepairFormProps) {
+export default function EditRepairForm({ onUpdateRepair, bus, history }: EditRepairFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      busId: "",
-      date: new Date(),
-      machineName: "",
-      contactNumber: "",
-      labourCharge: 0,
-      totalRepairCharge: 0,
-      remark: "",
+      date: parseISO(history.date),
+      machineName: history.machineName,
+      contactNumber: history.contactNumber,
+      labourCharge: history.labourCharge,
+      totalRepairCharge: history.totalRepairCharge,
+      remark: history.remark,
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const { busId, ...repairData } = values;
-    await onAddRepair(busId, repairData);
+    const updatedHistory: ServiceHistory = {
+      ...history,
+      ...values,
+      date: values.date.toISOString(),
+    };
+    await onUpdateRepair(bus.id, updatedHistory);
     setIsLoading(false);
-    form.reset();
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-            <FormField
+         <div className="p-4 bg-muted/50 rounded-md mb-4">
+            <p className="font-semibold">Editing repair for Bus: <span className="text-primary">{bus.busNumber}</span></p>
+        </div>
+        <FormField
             control={form.control}
-            name="busId"
+            name="date"
             render={({ field }) => (
-                <FormItem>
-                <FormLabel>Bus Number</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormItem className="flex flex-col">
+                <FormLabel>Service Date</FormLabel>
+                <Popover>
+                    <PopoverTrigger asChild>
                     <FormControl>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select a bus" />
-                    </SelectTrigger>
+                        <Button
+                        variant={"outline"}
+                        className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                        )}
+                        >
+                        {field.value ? (
+                            format(field.value, "PPP")
+                        ) : (
+                            <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
                     </FormControl>
-                    <SelectContent>
-                    {busRoutes.map((route) => (
-                        <SelectItem key={route.id} value={route.id}>
-                        {route.busNumber} ({route.driverName})
-                        </SelectItem>
-                    ))}
-                    </SelectContent>
-                </Select>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                    />
+                    </PopoverContent>
+                </Popover>
                 <FormMessage />
                 </FormItem>
             )}
             />
-            <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                    <FormLabel>Service Date</FormLabel>
-                    <Popover>
-                        <PopoverTrigger asChild>
-                        <FormControl>
-                            <Button
-                            variant={"outline"}
-                            className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                            )}
-                            >
-                            {field.value ? (
-                                format(field.value, "PPP")
-                            ) : (
-                                <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                        </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                        />
-                        </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-        </div>
         <div className="grid grid-cols-2 gap-4">
             <FormField
             control={form.control}
@@ -219,7 +191,7 @@ export default function AddRepairForm({ onAddRepair, busRoutes }: AddRepairFormP
         <div className="flex justify-end pt-2">
           <Button type="submit" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Add Repair Entry
+            Save Changes
           </Button>
         </div>
       </form>

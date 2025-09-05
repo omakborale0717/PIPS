@@ -25,16 +25,34 @@ import {
   DialogTrigger,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { format, subDays, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Wrench, Phone, CircleDollarSign, NotebookText, Hammer, Banknote, PlusCircle } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { Wrench, PlusCircle, MoreVertical, Loader2, Trash, IndianRupee } from 'lucide-react';
 import type { BusRoute, ServiceHistory } from '@/lib/types';
 import AddRepairForm from '@/components/bus-watch/add-repair-form';
-import { addServiceHistory } from '@/app/actions';
+import { addServiceHistory, updateServiceHistory, deleteServiceHistory } from '@/app/actions';
 import { toast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Label } from '../ui/label';
+import EditRepairForm from './edit-repair-form';
 
 type BusRepairClientProps = {
     initialBusRoutes: BusRoute[];
@@ -42,57 +60,49 @@ type BusRepairClientProps = {
 
 export default function BusRepairClient({ initialBusRoutes }: BusRepairClientProps) {
   const [busRoutes, setBusRoutes] = useState<BusRoute[]>(initialBusRoutes);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedBusId, setSelectedBusId] = useState<string | undefined>(initialBusRoutes[0]?.id);
+  
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const [selectedHistory, setSelectedHistory] = useState<ServiceHistory | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
 
   useEffect(() => {
     setBusRoutes(initialBusRoutes);
-  }, [initialBusRoutes]);
-
-  const getServiceHistoryArray = (route: BusRoute): ServiceHistory[] => {
-    if (!route.serviceHistory) return [];
-    // Convert the object of histories into an array
-    return Object.values(route.serviceHistory);
-  }
-
-  const getRepairStatus = (route: BusRoute) => {
-    const serviceHistoryArray = getServiceHistoryArray(route);
-    const lastServiceDate = serviceHistoryArray.length > 0
-      ? parseISO(serviceHistoryArray.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].date)
-      : subDays(new Date(), 91); // Mock old date if no history
-
-    const daysSinceService =
-      (new Date().getTime() - lastServiceDate.getTime()) / (1000 * 3600 * 24);
-
-    if (daysSinceService > 90) {
-      return { text: 'Needs Service', color: 'bg-red-500' };
+    if (!selectedBusId && initialBusRoutes.length > 0) {
+      setSelectedBusId(initialBusRoutes[0].id);
     }
-    if (daysSinceService > 60) {
-      return { text: 'Service Due', color: 'bg-yellow-500' };
-    }
-    return { text: 'Good', color: 'bg-green-500' };
-  };
+  }, [initialBusRoutes, selectedBusId]);
 
-  const handleAddRepair = async (busId: string, newService: Omit<ServiceHistory, 'date'> & { date: Date }) => {
-    const serviceToAdd: ServiceHistory = {
+  const selectedBus = useMemo(() => {
+    return busRoutes.find(b => b.id === selectedBusId);
+  }, [busRoutes, selectedBusId]);
+
+  const serviceHistoryArray = useMemo((): ServiceHistory[] => {
+    if (!selectedBus || !selectedBus.serviceHistory) return [];
+    return Object.entries(selectedBus.serviceHistory).map(([id, history]) => ({
+      id,
+      ...history,
+    })).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [selectedBus]);
+
+  
+  const handleAddRepair = async (busId: string, newService: Omit<ServiceHistory, 'id'|'date'> & {date: Date}) => {
+    const serviceToAdd = {
         ...newService,
         date: newService.date.toISOString(),
     }
     const result = await addServiceHistory(busId, serviceToAdd);
+
     if(result.success) {
         setBusRoutes(prevRoutes =>
             prevRoutes.map(route => {
                 if (route.id === busId) {
-                    const updatedHistoryArray = result.data;
-                    // The result from action is an array, but RTDB stores as object.
-                    // Let's create an object for consistency if needed, or just update state.
-                    const serviceHistoryObject = updatedHistoryArray.reduce((acc: any, curr: any, index: number) => {
-                        // This key generation is arbitrary and might not match what RTDB does.
-                        // It's better if the action returns the bus object. For now, this is a patch.
-                        acc[`hist_${index}`] = curr; 
-                        return acc;
-                    }, {});
-
-                    return { ...route, serviceHistory: serviceHistoryObject };
+                    const newHistory = { ...route.serviceHistory, [result.data.id]: serviceToAdd };
+                    return { ...route, serviceHistory: newHistory };
                 }
                 return route;
             })
@@ -101,7 +111,7 @@ export default function BusRepairClient({ initialBusRoutes }: BusRepairClientPro
             title: "Repair Logged",
             description: `Successfully logged a repair for bus.`
         });
-        setIsDialogOpen(false);
+        setIsAddDialogOpen(false);
     } else {
         toast({
             variant: "destructive",
@@ -111,18 +121,75 @@ export default function BusRepairClient({ initialBusRoutes }: BusRepairClientPro
     }
   };
 
+  const handleUpdateRepair = async (busId: string, updatedHistory: ServiceHistory) => {
+    const result = await updateServiceHistory(busId, updatedHistory);
+    if(result.success) {
+      setBusRoutes(prevRoutes =>
+        prevRoutes.map(route => {
+          if (route.id === busId) {
+            const updatedServiceHistory = { ...route.serviceHistory, [updatedHistory.id]: updatedHistory };
+            return { ...route, serviceHistory: updatedServiceHistory };
+          }
+          return route;
+        })
+      );
+      toast({ title: "Repair Updated", description: "Successfully updated repair entry." });
+      setIsEditDialogOpen(false);
+      setSelectedHistory(null);
+    } else {
+       toast({ variant: "destructive", title: "Error", description: result.error });
+    }
+  }
+  
+  const handleDeleteRepair = async () => {
+    if(!selectedBus || !selectedHistory) return;
+
+    setIsDeleting(true);
+    const result = await deleteServiceHistory(selectedBus.id, selectedHistory.id);
+    setIsDeleting(false);
+
+    if(result.success) {
+        setBusRoutes(prevRoutes =>
+            prevRoutes.map(route => {
+                if (route.id === selectedBus.id && route.serviceHistory) {
+                    const newHistory = {...route.serviceHistory};
+                    delete newHistory[selectedHistory.id];
+                    return { ...route, serviceHistory: newHistory };
+                }
+                return route;
+            })
+        );
+        toast({ title: "Repair Deleted", description: "Successfully deleted repair entry." });
+        setIsDeleteDialogOpen(false);
+        setSelectedHistory(null);
+    } else {
+        toast({ variant: "destructive", title: "Error", description: result.error });
+    }
+  }
+
+
+  const openEditDialog = (history: ServiceHistory) => {
+    setSelectedHistory(history);
+    setIsEditDialogOpen(true);
+  };
+  
+  const openDeleteDialog = (history: ServiceHistory) => {
+    setSelectedHistory(history);
+    setIsDeleteDialogOpen(true);
+  };
+
 
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-start justify-between">
           <div>
-            <CardTitle>Bus Repair Status</CardTitle>
+            <CardTitle>Bus Repair Management</CardTitle>
             <CardDescription>
-              Overview of the maintenance status for each bus. Click on a service date to see details.
+              Select a bus to view and manage its service history.
             </CardDescription>
           </div>
-           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <PlusCircle className="mr-2" />
@@ -141,122 +208,125 @@ export default function BusRepairClient({ initialBusRoutes }: BusRepairClientPro
           </Dialog>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Bus Number</TableHead>
-                <TableHead>Driver Name</TableHead>
-                <TableHead>Last Service</TableHead>
-                <TableHead>Repair Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {busRoutes.map((route) => {
-                const status = getRepairStatus(route);
-                const serviceHistoryArray = getServiceHistoryArray(route);
-                const lastServiceHistory = serviceHistoryArray.length > 0 ? serviceHistoryArray.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
-                 const lastServiceDate = lastServiceHistory
-                  ? parseISO(lastServiceHistory.date)
-                  : null;
+            <div className="max-w-xs mb-6">
+                 <Label htmlFor="bus-select">Select a Bus</Label>
+                <Select
+                    value={selectedBusId}
+                    onValueChange={(value) => setSelectedBusId(value)}
+                >
+                    <SelectTrigger id="bus-select">
+                        <SelectValue placeholder="Select a bus..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {busRoutes.map((route) => (
+                        <SelectItem key={route.id} value={route.id}>
+                            {route.busNumber} ({route.driverName})
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
 
-                return (
-                  <TableRow key={route.id}>
-                    <TableCell className="font-medium">
-                      {route.busNumber}
-                    </TableCell>
-                    <TableCell>{route.driverName}</TableCell>
-                    <TableCell>
-                      {lastServiceHistory && lastServiceDate ? (
-                         <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="link" className="p-0 h-auto">
-                              {format(lastServiceDate, 'PPP')}
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Service Details for {route.busNumber}</DialogTitle>
-                              <DialogDescription>
-                                 Service performed on {format(lastServiceDate, 'PPP')}
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4 py-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                 <div className="flex items-center gap-4">
-                                  <Wrench className="h-5 w-5 text-muted-foreground" />
-                                  <div>
-                                    <p className="text-sm text-muted-foreground">Machine Name</p>
-                                    <p className="font-medium">{lastServiceHistory.machineName}</p>
-                                  </div>
-                                </div>
-                                 <div className="flex items-center gap-4">
-                                  <Phone className="h-5 w-5 text-muted-foreground" />
-                                  <div>
-                                    <p className="text-sm text-muted-foreground">Contact Number</p>
-                                    <p className="font-medium">{lastServiceHistory.contactNumber}</p>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex items-start gap-4">
-                                <NotebookText className="h-5 w-5 text-muted-foreground mt-1" />
-                                 <div>
-                                  <p className="text-sm text-muted-foreground">Remark</p>
-                                  <p className="font-medium">{lastServiceHistory.remark}</p>
-                                </div>
-                              </div>
-
-                              <Separator />
-
-                              <div className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                    <div className="flex items-center gap-4">
-                                      <CircleDollarSign className="h-5 w-5 text-muted-foreground" />
-                                      <p className="text-sm">Labour Charge</p>
-                                    </div>
-                                    <p className="font-medium">₹{lastServiceHistory.labourCharge.toLocaleString()}</p>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <div className="flex items-center gap-4">
-                                      <Hammer className="h-5 w-5 text-muted-foreground" />
-                                      <p className="text-sm">Total Repair Charge</p>
-                                    </div>
-                                    <p className="font-medium">₹{lastServiceHistory.totalRepairCharge.toLocaleString()}</p>
-                                </div>
-                              </div>
-
-                              <Separator />
-                              
-                              <div className="flex justify-between items-center text-lg font-bold text-primary">
-                                  <div className="flex items-center gap-4">
-                                    <Banknote className="h-6 w-6" />
-                                    <p>Total Amount</p>
-                                  </div>
-                                  <p>₹{(lastServiceHistory.labourCharge + lastServiceHistory.totalRepairCharge).toLocaleString()}</p>
-                              </div>
-
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      ) : (
-                         'No service history'
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="default"
-                        className={cn('text-white', status.color)}
-                      >
-                        {status.text}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+            {selectedBus ? (
+                 <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Service Date</TableHead>
+                        <TableHead>Machine / Part</TableHead>
+                        <TableHead>Remark</TableHead>
+                        <TableHead className="text-right">Total Cost (₹)</TableHead>
+                        <TableHead><span className="sr-only">Actions</span></TableHead>
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {serviceHistoryArray.map((history) => (
+                            <TableRow key={history.id}>
+                                <TableCell>{format(parseISO(history.date), 'PPP')}</TableCell>
+                                <TableCell>{history.machineName}</TableCell>
+                                <TableCell>{history.remark}</TableCell>
+                                <TableCell className="text-right font-medium">
+                                    {(history.labourCharge + history.totalRepairCharge).toLocaleString()}
+                                </TableCell>
+                                <TableCell>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                            <span className="sr-only">Open menu</span>
+                                            <MoreVertical className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={() => openEditDialog(history)}>
+                                                Edit
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                            onClick={() => openDeleteDialog(history)}
+                                            className="text-destructive"
+                                            >
+                                            Delete
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                        {serviceHistoryArray.length === 0 && (
+                             <TableRow>
+                                <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                                    No service history found for this bus.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                    <Wrench className="mx-auto h-12 w-12" />
+                    <p className="mt-4">Please select a bus to see its repair history.</p>
+                </div>
+            )}
         </CardContent>
       </Card>
+
+    {/* Edit Dialog */}
+    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-[650px]">
+            <DialogHeader>
+            <DialogTitle>Edit Repair Details</DialogTitle>
+            <DialogDescription>
+                Update the details for the selected service entry.
+            </DialogDescription>
+            </DialogHeader>
+            {selectedHistory && selectedBus && (
+                <EditRepairForm
+                    bus={selectedBus}
+                    history={selectedHistory}
+                    onUpdateRepair={handleUpdateRepair}
+                />
+            )}
+        </DialogContent>
+    </Dialog>
+
+    {/* Delete Alert Dialog */}
+    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This will permanently delete this service record from {format(parseISO(selectedHistory?.date || new Date().toISOString()), 'PPP')}. This action cannot be undone.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setSelectedHistory(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteRepair} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash className="mr-2 h-4 w-4" />}
+                    Delete
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
     </div>
   );
 }
+
+    

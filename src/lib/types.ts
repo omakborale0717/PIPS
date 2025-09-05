@@ -29,6 +29,7 @@ export type Arrival = {
 };
 
 export type ServiceHistory = {
+    id: string;
     date: string;
     machineName: string;
     contactNumber: string;
@@ -45,7 +46,7 @@ export type BusRoute = {
     contact: string;
     fuelLevel?: number;
     lastFueled?: string;
-    serviceHistory?: Record<string, ServiceHistory>;
+    serviceHistory?: Record<string, Omit<ServiceHistory, 'id'>>;
 }
 
 export type Student = {
@@ -130,3 +131,5 @@ export type ProfileSettings = {
   contactNumber: string;
   address: string;
 }
+
+    
