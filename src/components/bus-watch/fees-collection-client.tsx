@@ -66,6 +66,8 @@ type FeeDetails = {
   balance: number;
   class?: string;
   village?: string;
+  term1: number;
+  term2: number;
 };
 
 
@@ -114,11 +116,16 @@ export default function FeesCollectionClient({
     if (detail.id === 'school' && field === 'class') {
       const schoolFee = schoolFees.find(sf => sf.class === value);
       detail.totalAmount = schoolFee ? schoolFee.total : 0;
+      detail.term1 = schoolFee ? schoolFee.term1 : 0;
+      detail.term2 = schoolFee ? schoolFee.term2 : 0;
     }
     
     if (detail.id === 'bus' && field === 'village') {
        const villageFee = villageFees.find(vf => vf.villageName === value);
-       detail.totalAmount = villageFee ? villageFee.feeAmount : 0;
+       const feeAmount = villageFee ? villageFee.feeAmount : 0;
+       detail.totalAmount = feeAmount;
+       detail.term1 = feeAmount / 2;
+       detail.term2 = feeAmount / 2;
     }
     
     const balance = detail.totalAmount - detail.paidAmount;
@@ -141,7 +148,8 @@ export default function FeesCollectionClient({
         setSelectedStudent(student);
         const studentPayments = getStudentPayments(student.id);
         
-        const schoolFeeAmount = schoolFees.find(sf => sf.class === student.class)?.total || 0;
+        const schoolFeeInfo = schoolFees.find(sf => sf.class === student.class);
+        const schoolFeeAmount = schoolFeeInfo?.total || 0;
         const busFeeAmount = student.usesBus ? (villageFees.find(vf => vf.villageName === student.village)?.feeAmount || 0) : 0;
         const busPaidAmount = studentPayments.reduce((acc, p) => acc + p.amountPaid, 0);
 
@@ -162,6 +170,8 @@ export default function FeesCollectionClient({
              balance: schoolFeeAmount, // Placeholder
              class: student.class,
              village: student.village,
+             term1: schoolFeeInfo?.term1 || 0,
+             term2: schoolFeeInfo?.term2 || 0,
         };
         details.push(schoolFeeDetail);
         
@@ -175,6 +185,8 @@ export default function FeesCollectionClient({
                 balance: busFeeAmount - busPaidAmount,
                 class: student.class,
                 village: student.village,
+                term1: busFeeAmount / 2,
+                term2: busFeeAmount / 2,
             };
             details.push(busFeeDetail);
         }
@@ -192,6 +204,8 @@ export default function FeesCollectionClient({
                 balance: balance,
                 class: cat.class || student.class,
                 village: cat.village || student.village,
+                term1: cat.term1 || 0,
+                term2: cat.term2 || 0,
             });
         });
 
@@ -226,6 +240,14 @@ export default function FeesCollectionClient({
 
   const totalFees = useMemo(() => {
     return studentFeeDetails.reduce((acc, fee) => acc + (fee.totalAmount || 0), 0);
+  }, [studentFeeDetails]);
+
+  const term1Total = useMemo(() => {
+    return studentFeeDetails.reduce((acc, fee) => acc + (fee.term1 || 0), 0);
+  }, [studentFeeDetails]);
+
+  const term2Total = useMemo(() => {
+    return studentFeeDetails.reduce((acc, fee) => acc + (fee.term2 || 0), 0);
   }, [studentFeeDetails]);
 
 
@@ -528,51 +550,82 @@ export default function FeesCollectionClient({
               <CardTitle>Payment Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6 max-w-sm">
-                 <div>
-                  <Label htmlFor="receipt-number">Receipt Number</Label>
-                  <div className="relative mt-2">
-                     <Receipt className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="receipt-number"
-                      placeholder="Enter receipt no."
-                      value={receiptNumber}
-                      onChange={(e) => setReceiptNumber(e.target.value)}
-                      className="pl-8"
-                    />
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="lg:col-span-2 space-y-4">
+                  <div>
+                    <Label htmlFor="receipt-number">Receipt Number</Label>
+                    <div className="relative mt-2">
+                      <Receipt className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="receipt-number"
+                        placeholder="Enter receipt no."
+                        value={receiptNumber}
+                        onChange={(e) => setReceiptNumber(e.target.value)}
+                        className="pl-8"
+                      />
+                    </div>
                   </div>
-                </div>
-
-                <div>
-                    <Label>Total Fees</Label>
-                    <p className="text-2xl font-bold mt-1">₹{totalFees.toLocaleString()}</p>
-                </div>
-
-                <div>
+                  <div>
                     <Label htmlFor="amount-to-pay">Amount to Pay</Label>
                     <div className="relative mt-2">
-                        <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
+                      <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
                         id="amount-to-pay"
                         type="number"
                         placeholder="Enter amount"
                         value={amountToPay}
                         onChange={(e) => setAmountToPay(Number(e.target.value))}
                         className="pl-8 text-lg font-semibold"
-                        />
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-3 rounded-lg border p-4">
+                    <h4 className="font-medium text-center">Fee Summary</h4>
+                    <Separator />
+                    <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Term 1 Total:</span>
+                        <span className="font-medium">₹{term1Total.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Term 2 Total:</span>
+                        <span className="font-medium">₹{term2Total.toLocaleString()}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between font-bold text-base">
+                        <span>Total Fees:</span>
+                        <span>₹{totalFees.toLocaleString()}</span>
                     </div>
                 </div>
-
-                <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                    <Button onClick={handlePaymentSubmit} disabled={amountToPay <= 0} className="w-full sm:w-auto">
-                        <Save className="mr-2 h-4 w-4" />
-                        Submit Payment
-                    </Button>
-                    <Button onClick={handleGenerateReceipt} variant="outline" disabled={amountToPay <= 0} className="w-full sm:w-auto">
-                        <Printer className="mr-2 h-4 w-4" />
-                        Generate Receipt
-                    </Button>
+                
+                <div className="space-y-3 rounded-lg border p-4">
+                     <h4 className="font-medium text-center">Balance Summary</h4>
+                     <Separator />
+                     <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Total Paid:</span>
+                        <span className="font-medium text-green-600">₹{studentFeeDetails.reduce((acc, fee) => acc + (fee.paidAmount || 0), 0).toLocaleString()}</span>
+                    </div>
+                     <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Total Due:</span>
+                        <span className="font-medium text-red-600">₹{totalPayable.toLocaleString()}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between font-bold text-base">
+                        <span>Final Balance:</span>
+                        <span>₹{studentFeeDetails.reduce((acc, fee) => acc + (fee.balance || 0), 0).toLocaleString()}</span>
+                    </div>
                 </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 pt-6">
+                <Button onClick={handlePaymentSubmit} disabled={amountToPay <= 0} className="w-full sm:w-auto">
+                    <Save className="mr-2 h-4 w-4" />
+                    Submit Payment
+                </Button>
+                <Button onClick={handleGenerateReceipt} variant="outline" disabled={amountToPay <= 0} className="w-full sm:w-auto">
+                    <Printer className="mr-2 h-4 w-4" />
+                    Generate Receipt
+                </Button>
               </div>
             </CardContent>
           </Card>
