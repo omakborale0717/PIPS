@@ -45,7 +45,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
@@ -88,7 +87,6 @@ export default function FeesCollectionClient({
   const [isSearching, setIsSearching] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [studentFeeDetails, setStudentFeeDetails] = useState<FeeDetails[]>([]);
-  const [selectedFeeIds, setSelectedFeeIds] = useState<string[]>([]);
   const [selectedClass, setSelectedClass] = useState('all');
   const [receiptNumber, setReceiptNumber] = useState('');
   const [amountToPay, setAmountToPay] = useState(0);
@@ -216,7 +214,6 @@ export default function FeesCollectionClient({
     searchForm.reset({studentId: '', academicYear: searchForm.getValues('academicYear')});
     setSelectedStudent(null);
     setStudentFeeDetails([]);
-    setSelectedFeeIds([]);
     setSelectedClass('all');
     setReceiptNumber('');
     setAmountToPay(0);
@@ -224,9 +221,8 @@ export default function FeesCollectionClient({
 
   const totalPayable = useMemo(() => {
     return studentFeeDetails
-      .filter((fee) => selectedFeeIds.includes(fee.id))
       .reduce((acc, fee) => acc + (fee.dueAmount || 0), 0);
-  }, [studentFeeDetails, selectedFeeIds]);
+  }, [studentFeeDetails]);
 
   const totalFees = useMemo(() => {
     return studentFeeDetails.reduce((acc, fee) => acc + (fee.totalAmount || 0), 0);
@@ -250,7 +246,7 @@ export default function FeesCollectionClient({
     if (!selectedStudent) return;
 
     // We'll just log bus fee payments for now, as that's what we have a model for.
-    const busFeeSelected = studentFeeDetails.find(fee => selectedFeeIds.includes(fee.id) && fee.id === 'bus');
+    const busFeeSelected = studentFeeDetails.find(fee => fee.id === 'bus');
 
     if (busFeeSelected) {
         const result = await addBusFeePayment({
@@ -460,16 +456,6 @@ export default function FeesCollectionClient({
             <Table>
                 <TableHeader>
                 <TableRow>
-                    <TableHead className="w-[50px]">
-                    <Checkbox
-                        checked={selectedFeeIds.length === studentFeeDetails.filter(f => (f.dueAmount || 0) > 0).length && studentFeeDetails.filter(f => (f.dueAmount || 0) > 0).length > 0}
-                        onCheckedChange={(checked) => {
-                        setSelectedFeeIds(
-                            checked ? studentFeeDetails.filter(f => (f.dueAmount || 0) > 0).map((fee) => fee.id) : []
-                        );
-                        }}
-                    />
-                    </TableHead>
                     <TableHead>Fees Category</TableHead>
                     <TableHead>Class</TableHead>
                     <TableHead>Village</TableHead>
@@ -482,19 +468,6 @@ export default function FeesCollectionClient({
                 <TableBody>
                 {studentFeeDetails.map((fee, index) => (
                     <TableRow key={fee.id}>
-                    <TableCell>
-                        <Checkbox
-                        checked={selectedFeeIds.includes(fee.id)}
-                        disabled={(fee.dueAmount || 0) <= 0}
-                        onCheckedChange={(checked) => {
-                            setSelectedFeeIds(
-                            checked
-                                ? [...selectedFeeIds, fee.id]
-                                : selectedFeeIds.filter((id) => id !== fee.id)
-                            );
-                        }}
-                        />
-                    </TableCell>
                     <TableCell className="font-medium flex items-center gap-2">
                         {getCategoryIcon(fee.name)}
                         {fee.name}
